@@ -1,0 +1,26 @@
+{
+  "name": "@proofflow/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": { "proofflow-server": "./dist/main.js" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "seed:sample": "tsx src/seed/sample.ts"
+  },
+  "dependencies": {
+    "@proofflow/shared": "workspace:*",
+    "fastify": "5.12.5",
+    "@fastify/cookie": "11.0.2",
+    "@fastify/static": "10.1.5",
+    "@fastify/rate-limit": "10.3.0",
+    "zod": "4.6.5",
+    "jszip": "3.10.2",
+    "pg": "8.23.1"
+  },
+  "devDependencies": { "@types/pg": "8.15.5" }
+}

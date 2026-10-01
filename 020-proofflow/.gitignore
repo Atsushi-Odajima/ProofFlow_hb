@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+data/
+.proofflow-data/
+coverage/
+*.log
+.DS_Store
+test-results/
+packages/web/dist/
+tmp/

@@ -1,0 +1,6 @@
+NEXT_STEPS.txt — 次にやること（上から順）
+
+1. Phase 1: shared パッケージ（RBAC / step schema / enums）と server の DB 基盤・migration・auth・tenant API を実装し、必須テスト 1,2,3,4 を通す。
+2. Phase 2: Requirement / Scenario / Suite / AI Draft。
+3. Phase 3: Runner と evidence。
+（以降 PLAN.md の Phase 順）

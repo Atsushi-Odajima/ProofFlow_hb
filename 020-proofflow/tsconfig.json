@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true, "composite": false, "declaration": false, "allowImportingTsExtensions": true,
+    "baseUrl": ".",
+    "paths": {
+      "@proofflow/shared": ["packages/shared/src/index.ts"],
+      "@proofflow/server/*": ["packages/server/src/*"],
+      "@proofflow/runner/*": ["packages/runner/src/*"],
+      "@proofflow/mcp/*": ["packages/mcp/src/*"],
+      "@proofflow/cli/*": ["packages/cli/src/*"]
+    }
+  },
+  "include": ["tests/**/*.ts", "vitest.config.ts", "vitest.e2e.config.ts"]
+}
