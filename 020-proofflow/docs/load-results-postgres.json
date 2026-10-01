@@ -1,0 +1,198 @@
+{
+  "dialect": "postgres",
+  "node": "v22.22.0",
+  "cpus": 4,
+  "cpuModel": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "memGB": 17,
+  "date": "2026-10-01T12:30:56.667Z",
+  "scales": {
+    "100": {
+      "runsInProject": 100,
+      "results": 100,
+      "artifactsMeta": 100,
+      "create": {
+        "latencyMs": {
+          "n": 100,
+          "p50": 7.64,
+          "p95": 15.8,
+          "max": 17.96,
+          "mean": 8.45
+        },
+        "runsPerSec": 118.2
+      },
+      "drain": {
+        "jobs": 100,
+        "jobsPerSec": 36.5,
+        "leaseMs": {
+          "n": 24,
+          "p50": 45.88,
+          "p95": 83.59,
+          "max": 88.15,
+          "mean": 45.99
+        },
+        "completeMs": {
+          "n": 100,
+          "p50": 24.16,
+          "p95": 43.78,
+          "max": 68.13,
+          "mean": 25.57
+        },
+        "uploads": 100,
+        "uploadMs": {
+          "n": 100,
+          "p50": 14.4,
+          "p95": 43.6,
+          "max": 62.87,
+          "mean": 18.27
+        },
+        "uploadMBps": 11.2,
+        "concurrentRunners": 4
+      },
+      "queries": {
+        "dashboard": {
+          "n": 20,
+          "p50": 7.57,
+          "p95": 19.51,
+          "max": 19.51,
+          "mean": 7.74
+        },
+        "runList50": {
+          "n": 20,
+          "p50": 3.65,
+          "p95": 7.54,
+          "max": 7.54,
+          "mean": 4.23
+        },
+        "runListFailed": {
+          "n": 20,
+          "p50": 1.97,
+          "p95": 3.29,
+          "max": 3.29,
+          "mean": 1.98
+        },
+        "runDetail": {
+          "n": 20,
+          "p50": 4.89,
+          "p95": 9.14,
+          "max": 9.14,
+          "mean": 5.18
+        },
+        "audit50": {
+          "n": 20,
+          "p50": 2.28,
+          "p95": 6.06,
+          "max": 6.06,
+          "mean": 2.41
+        },
+        "flaky": {
+          "n": 20,
+          "p50": 3.38,
+          "p95": 6.05,
+          "max": 6.05,
+          "mean": 3.79
+        },
+        "storage": {
+          "n": 20,
+          "p50": 1.62,
+          "p95": 2.95,
+          "max": 2.95,
+          "mean": 1.82
+        }
+      }
+    },
+    "1000": {
+      "runsInProject": 1000,
+      "results": 1000,
+      "artifactsMeta": 300,
+      "create": {
+        "latencyMs": {
+          "n": 900,
+          "p50": 6.43,
+          "p95": 15.88,
+          "max": 102.2,
+          "mean": 7.78
+        },
+        "runsPerSec": 128.5
+      },
+      "drain": {
+        "jobs": 900,
+        "jobsPerSec": 45.5,
+        "leaseMs": {
+          "n": 183,
+          "p50": 25.78,
+          "p95": 38.38,
+          "max": 92.67,
+          "mean": 26.45
+        },
+        "completeMs": {
+          "n": 900,
+          "p50": 13.08,
+          "p95": 23.71,
+          "max": 66.66,
+          "mean": 14.09
+        },
+        "uploads": 200,
+        "uploadMs": {
+          "n": 200,
+          "p50": 9.88,
+          "p95": 23.21,
+          "max": 58.01,
+          "mean": 11.29
+        },
+        "uploadMBps": 18.1,
+        "concurrentRunners": 4
+      },
+      "queries": {
+        "dashboard": {
+          "n": 20,
+          "p50": 6.88,
+          "p95": 14.09,
+          "max": 14.09,
+          "mean": 7.44
+        },
+        "runList50": {
+          "n": 20,
+          "p50": 3.23,
+          "p95": 4.8,
+          "max": 4.8,
+          "mean": 3.22
+        },
+        "runListFailed": {
+          "n": 20,
+          "p50": 2.27,
+          "p95": 4.91,
+          "max": 4.91,
+          "mean": 2.34
+        },
+        "runDetail": {
+          "n": 20,
+          "p50": 3.43,
+          "p95": 6.26,
+          "max": 6.26,
+          "mean": 3.76
+        },
+        "audit50": {
+          "n": 20,
+          "p50": 2.66,
+          "p95": 3.33,
+          "max": 3.33,
+          "mean": 2.67
+        },
+        "flaky": {
+          "n": 20,
+          "p50": 4.77,
+          "p95": 6.37,
+          "max": 6.37,
+          "mean": 4.81
+        },
+        "storage": {
+          "n": 20,
+          "p50": 2.08,
+          "p95": 3.95,
+          "max": 3.95,
+          "mean": 2.24
+        }
+      }
+    }
+  }
+}
