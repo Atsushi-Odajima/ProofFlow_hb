@@ -1,0 +1,43 @@
+Release Gate（リリース判定）
+===========================
+
+■ 考え方
+「リリースしてよいか」を、人の勘や AI の印象ではなく、記録された実行結果・不具合・レビュー・実機確認から決定論的に判定します。結果は 3 種類:
+- READY: すべてのルールを満たした
+- BLOCKED: 満たさないルールがある（理由と証拠付き）
+- READY WITH ACCEPTED RISK: 既知の不具合を、承認者が理由・影響・再確認日付きで「受け入れた」上で READY
+判定は人が押す「Gate を評価」でも、CLI / CI / MCP からでも同じです。ただし「リリースする」ボタンを押せるのは人（Owner / Admin / QA Lead）だけで、AI や service token では押せません。
+
+■ Release Candidate（RC）を作る
+「リリース」→ 新規作成: バージョン（例 1.2.0）、対象 Environment、commit / build、含まれる変更、必須 Suite（既定: requiredForRelease の Suite）、必須の手動チェック（例「iPhone smoke」）。作成時に既定ルールが入ります:
+1. suite_pass_rate: 必須 Suite の最新実行が 100% pass（flaky は fail 扱い）
+2. open_defects_max: critical の未解決不具合 0 件（Accepted Risk 不可）
+3. open_defects_max: high の未解決不具合 0 件（Accepted Risk 可）
+4. visual_approved: 未レビューの Visual 差分がない
+5. manual_check_required: 指定ラベルの手動チェックが pass で記録されている
+6. accessibility_max: critical な axe 違反 0 件
+7. no_infra_errors: インフラエラーの結果がない（再実行が必要）
+ルールは RC ごとに編集できます（変更は監査ログに残ります）。
+
+■ 判定に使う実行
+Suite ごとに「その RC に紐づけて実行した最新の完了 Run」を見ます。古い失敗 Run は、修正後に同じ Suite を RC 付きで再実行すれば上書きされます（再実行には「RC」を指定してください。指定がない Run は判定に使われません）。
+
+■ Sample SaaS でのデモ（RC 1.2.0）
+1. Critical を RC 1.2.0 で実行 → 7 件失敗 → Gate: BLOCKED（suite_pass_rate、critical defects …）
+2. 失敗から Defect を作る → バグを直す（Sample SaaS では /__sample/bugs を OFF）→ 再テスト → Verified
+3. Critical を RC 1.2.0 でもう一度実行 → 全 pass。Visual の差分は「却下 / 承認」でレビュー済みにする
+4. それでも BLOCKED: 「manual check "iPhone smoke" not performed」
+5. 「手動/実機」で iPhone smoke を pass、写真を添付して記録 → Gate: READY
+6. 「リリース」を押す（人）→ RC は released になり、以後変更できません
+7. 「Evidence Report」を HTML / PDF で出力する（下記）
+
+■ Accepted Risk（受け入れたリスク）
+high 以下の既知の不具合を抱えたままリリースする場合: Defect・理由（5 文字以上）・影響・再確認日が必須で、承認者は人（QA Lead 以上）です。critical は受け入れられません（既定ルール）。受け入れは監査ログと Evidence Report に残ります。
+
+■ Evidence Report
+RC の情報、Environment、ブラウザのバージョン、各 Run の結果と件数、不具合、Visual レビュー、手動チェック（端末・実施者・日時・証跡）、Accepted Risk、Gate の評価をまとめた HTML / PDF（PDF は control plane に Playwright がある場合）。チェックサム付きで artifact として保存されます。
+レポートには「この文書は品質保証証明書・認証・保証書ではありません」という免責が入ります。ProofFlow は「何を・いつ・どう確認したか」の記録であり、品質を保証する制度ではありません。
+
+■ CLI / CI
+  proofflow gate --project my-app --release 1.2.0        # 終了コード 0 = READY、5 = BLOCKED
+  proofflow report --project my-app --release 1.2.0 --format html --out evidence-1.2.0.html

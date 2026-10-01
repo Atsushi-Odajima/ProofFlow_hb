@@ -63,7 +63,7 @@ PoC 実測値（1.56.1 / Chromium 141 / headless / 4 vCPU）: 起動 0.85s、got
 
 fastify 5.12.5 / zod 4.6.5 / vitest 5.0.3 / typescript 7.0.2（**本製品は 5.9.3 を使用**: 7.x はネイティブ実装の新系統で周辺ツール互換を未検証） / react 19.3.0 / vite 8.3.1 / pixelmatch 7.2.0 / pngjs 7.0.0 / jszip 3.10.2 / pg 8.23.1 / @axe-core/playwright 4.13.0 / commander 15.0.0 / openai 7.25.0 / @anthropic-ai/sdk 0.131.0。
 
-AI provider は SDK を使わず HTTP（fetch）で直接呼ぶ（依存最小化、AI OFF 時に provider 呼び出しゼロをテスト可能にするため）。
+AI provider は公式 SDK（`@anthropic-ai/sdk` 0.131.0 / `openai` 7.25.0）を使用。AI OFF（`PROOFFLOW_AI_PROVIDER=none`）時は provider オブジェクト自体を生成しないため呼び出しゼロ（tests/phase2 で検証）。実 API 呼び出しは課金のため未実施（型検査 + mock provider）。
 
 ## 6. 本環境の実測基盤
 
@@ -76,3 +76,11 @@ AI provider は SDK を使わず HTTP（fetch）で直接呼ぶ（依存最小�
 2. developers.openai.com の Apps SDK / Codex MCP ページ（遮断により未閲覧）。
 3. modelcontextprotocol.io の最新仕様（2026-07-28 以降の SDK 対応状況）。
 4. docs.github.com の Actions secrets / syntax ページの最新表示。
+
+## 8. Phase 11 / 12 で追加した一次情報（2026-10-01）
+
+- PostgreSQL 16.14（本環境のローカル cluster、`psql` で確認）: `pnpm test:pg` で phase1〜11 を実行（TEST_REPORT.md）。接続文字列の `options=-c search_path=...` は `pg-connection-string`（pg 8.23.1 同梱）の実装で確認。
+- Playwright Docker image タグ `mcr.microsoft.com/playwright:v1.56.1-noble`（deploy/Dockerfile.runner）: Playwright の公式イメージ命名規則（`v<version>-<ubuntu codename>`）に従う。playwright.dev は遮断のため未閲覧。販売前に `docker pull` で存在を確認すること（RELEASE_CHECKLIST.md A）。
+- `node:sqlite` の `DatabaseSync`（Node 22.22.0）は ExperimentalWarning を出すが動作に問題なし（Node 22.13 以降で利用可）。
+- 負荷計測は `tests/load/load.test.ts`（自作、外部ツール不使用）。結果 `docs/load-results-sqlite.json`。
+- UI 検証は Playwright 1.56.1 の Chromium 141 のデバイスエミュレーション（iPhone 15 相当 390×844 @3x、Pixel 8 相当 412×915 @2.625x）。実機ではない。

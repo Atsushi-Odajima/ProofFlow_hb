@@ -1,0 +1,52 @@
+ProofFlow（商品 #020）— はじめに
+================================
+
+■ ProofFlow とは
+Web サイト・Web アプリを「公開してよいか」を、実際のブラウザで動かした結果と証跡（スクリーンショット・動画・トレース・コンソール・通信記録）で判断するための品質検証／受入テスト基盤です。
+AI が「たぶん大丈夫」と言う製品ではありません。テストの実行結果、assertion（期待値との照合）、evidence（証跡）が中心で、AI は要約や下書きを提案するだけです。AI はテスト結果・baseline・期待値を書き換えず、リリースを承認しません。
+
+■ できること（初版）
+- 要件 / 受入基準 → テストシナリオ（ノーコードの typed step。任意の JavaScript は書かせません）→ Suite → 実行
+- Chromium / Firefox / WebKit（Playwright）での実ブラウザ実行、PC / スマホ viewport の切り替え
+- 失敗時の証跡: スクリーンショット、DOM、動画、Playwright trace、console、network（秘密情報は保存前にマスク）
+- Console error / 5xx / リンク切れ / フォーム二重送信 / アップロード拒否 / ダウンロード名と MIME / API 契約（JSON schema）/ レイテンシ
+- Visual Regression（承認制 baseline）、スマホ表示のヒューリスティック（横スクロール・CTA 画面外）、axe によるアクセシビリティ検査
+- 失敗の fingerprint 化と不具合（Defect）管理、修正後の再テストで Verified / 再発で Reopened、Flaky 検出
+- Release Candidate と Release Gate（READY / BLOCKED / READY WITH ACCEPTED RISK）、Evidence Report（HTML / PDF）
+- 手動 / 実機確認の記録（iPhone / Android の実機は人が確認し証跡を添付）
+- CLI（proofflow run / status / gate）、GitHub Actions 例、ChatGPT / Codex / Claude Code 向け MCP Plugin
+- スケジュール実行、通知（アプリ内 / Webhook / Slack）、バックアップ / 復元、監査ログ
+
+■ できないこと（初版）
+ネイティブ iOS / Android アプリの自動操作、ペネトレーションテスト、負荷攻撃、第三者サイトのテスト、AI によるリリース自動承認、WCAG 完全準拠の保証、品質保証の「認証」。詳しくは「注意事項.txt」。
+
+■ 構成（3 つのプロセス）
+1. control plane（サーバー）: API、Web 画面、キュー、スケジューラ、保持期間管理。SQLite 既定（PostgreSQL も可）。
+2. runner: Playwright でブラウザを動かす実行機。サーバーから job を受け取り、証跡をアップロード。複数台にできます。
+3. Web 画面（PWA）: PC / スマホのブラウザで利用。ホーム画面に追加できます。
+さらに ChatGPT / Codex 用の MCP server、CLI、デモ用の「Sample SaaS」が同梱されています。
+
+■ 動作要件
+- Node.js 22.13 以上（推奨 22.22）、pnpm 10
+- ブラウザ: npx playwright install chromium（Firefox / WebKit も使う場合は追加）
+- OS: Linux / macOS / Windows（WSL2 推奨）。メモリ 4 GB 以上。
+
+■ 最初に読む順番
+1. 5分で最初のテスト.txt
+2. 不具合の見方.txt → 修正後に再テストする.txt
+3. Release Gate.txt
+4. 必要に応じて スマホ表示を確認する.txt / Visual Regression.txt / ChatGPT-Codex Plugin.txt / CI連携.txt / 実機確認.txt
+5. 個人情報とテストデータ.txt / 運用コスト.txt / 注意事項.txt は運用前に必ず
+
+■ 用語
+- Requirement / Acceptance Criteria: 要件と受入基準（Given / When / Then）
+- Scenario: ノーコードの手順（navigate / click / fill / assert_text など）
+- Suite: Scenario の束。Smoke / Critical / Visual / Mobile / API など
+- Run / Result: 1 回の実行とその中の 1 シナリオ × 1 ブラウザ × 1 viewport の結果
+- Evidence / Artifact: 証跡ファイル
+- Defect: 不具合。Failure fingerprint（同じ失敗の指紋）でまとめられます
+- Release Candidate（RC）/ Release Gate: リリース候補と、その判定ルール
+- Baseline: Visual Regression の「正」とする画像。人が理由付きで承認します
+
+■ サポート範囲
+本製品は自己ホスト型のソフトウェアです。クラウド費用、AI API 費用、ブラウザ実行のための計算資源は購入者負担です（運用コスト.txt）。

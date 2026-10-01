@@ -15,7 +15,7 @@ export class ManualService {
 
   async cases(projectId: string) {
     const rows = await this.db.all<{ id: string; key: string; title: string; category: string; label: string | null; description: string | null; steps: string | null; expected: string | null; created_at: string }>(`SELECT * FROM manual_cases WHERE project_id = ? ORDER BY key`, [projectId]);
-    return Promise.all(rows.map(async (r) => ({ id: r.id, key: r.key, title: r.title, category: r.category, label: r.label, description: r.description, steps: r.steps, expected: r.expected, createdAt: r.created_at, requirementIds: (await this.db.all<{ requirement_id: string }>(`SELECT requirement_id FROM manual_case_requirements WHERE manual_case_id = ?`, [r.id])).map((x) => x.requirement_id) })));
+    return Promise.all(rows.map(async (r) => ({ id: r.id, key: r.key, title: r.title, category: r.category, label: r.label, description: r.description, steps: r.steps, expected: r.expected, createdAt: r.created_at, requirementIds: (await this.db.all<{ requirement_id: string }>(`SELECT requirement_id FROM manual_case_requirements WHERE manual_case_id = ? ORDER BY requirement_id`, [r.id])).map((x) => x.requirement_id) })));
   }
   async createCase(ctx: Ctx, p: ProjectRow, input: { title: string; category: string; description?: string; steps?: string; expected?: string; requirementIds?: string[]; label?: string }) {
     const id = ulid(); const now = nowIso(); const key = await this.projects.nextKey(this.db, p.id, 'MC');

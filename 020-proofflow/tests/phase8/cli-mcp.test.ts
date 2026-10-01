@@ -90,20 +90,20 @@ describe('Phase 8: MCP plugin (E2E-6 / 必須テスト35)', () => {
     const tools = await client.listTools();
     expect(tools.tools.map((t) => t.name).sort()).toEqual([...TOOL_NAMES].sort());
     const an = await client.callTool({ name: 'analyze_test_target', arguments: { project: p.project.id } });
-    const anData = (an as { structuredContent: { suites: Array<{ name: string }>; environment: { kind: string } } }).structuredContent;
+    const anData = (an as unknown as { structuredContent: { suites: Array<{ name: string }>; environment: { kind: string } } }).structuredContent;
     expect(anData.suites.some((s) => s.name === 'Smoke')).toBe(true); expect(anData.environment.kind).toBe('local');
     const runP = client.callTool({ name: 'run_test_suite', arguments: { project: p.project.id, suite: 'Smoke', wait: true } });
     await new Promise((r) => setTimeout(r, 400)); await p.runner.drain();
-    const run = (await runP) as { structuredContent: { runId: string; status: string; failures: Array<{ resultId: string }> } };
+    const run = (await runP) as unknown as { structuredContent: { runId: string; status: string; failures: Array<{ resultId: string }> } };
     expect(run.structuredContent.status).toBe('failed'); expect(run.structuredContent.failures.length).toBe(1);
     const sum = await client.callTool({ name: 'summarize_failures', arguments: { runId: run.structuredContent.runId } });
-    expect((sum as { structuredContent: { groups: Array<{ type: string }> } }).structuredContent.groups[0]!.type).toBe('assertion');
+    expect((sum as unknown as { structuredContent: { groups: Array<{ type: string }> } }).structuredContent.groups[0]!.type).toBe('assertion');
     const gate = await client.callTool({ name: 'get_release_gate', arguments: { project: p.project.id, version: '2.0.0' } });
-    expect((gate as { structuredContent: { result: string; note: string } }).structuredContent.note).toContain('does not approve');
+    expect((gate as unknown as { structuredContent: { result: string; note: string } }).structuredContent.note).toContain('does not approve');
     const def = await client.callTool({ name: 'create_defect_from_failure', arguments: { resultId: run.structuredContent.failures[0]!.resultId, severity: 'high' } });
-    expect((def as { structuredContent: { key: string } }).structuredContent.key).toMatch(/^DEF-\d+$/);
+    expect((def as unknown as { structuredContent: { key: string } }).structuredContent.key).toMatch(/^DEF-\d+$/);
     const ev = await client.callTool({ name: 'prepare_release_evidence', arguments: { project: p.project.id, version: '2.0.0' } });
-    expect((ev as { structuredContent: { artifactId: string } }).structuredContent.artifactId).toBeTruthy();
+    expect((ev as unknown as { structuredContent: { artifactId: string } }).structuredContent.artifactId).toBeTruthy();
     await client.close(); await server.close();
   });
   it('必須テスト35: a plugin token restricted to project A cannot run or read project B; destructive on production needs confirmation', async () => {
@@ -137,7 +137,7 @@ describe('Phase 8: MCP plugin (E2E-6 / 必須テスト35)', () => {
     const tools = await client.listTools(); expect(tools.tools.length).toBe(TOOL_NAMES.length);
     const runs = (await p.A.get(`/api/v1/projects/${p.project.id}/runs?limit=1`)).json().data;
     const r = await client.callTool({ name: 'get_test_run', arguments: { runId: runs[0].id } });
-    expect((r as { structuredContent: { runId: string } }).structuredContent.runId).toBe(runs[0].id);
+    expect((r as unknown as { structuredContent: { runId: string } }).structuredContent.runId).toBe(runs[0].id);
     await client.close(); await new Promise<void>((r) => srv.close(() => r()));
   });
 });

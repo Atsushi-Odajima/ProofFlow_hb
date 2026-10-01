@@ -1,0 +1,27 @@
+スマホ表示を確認する
+====================
+
+■ 2 段階で考える
+1. 自動（毎回）: Chromium のモバイル viewport エミュレーション（iPhone 15 相当 390×844、Pixel 8 相当 412×915。タッチ・デバイスピクセル比付き）で、レイアウト崩れ・横スクロール・CTA 画面外・フォントの極端な縮小・固定要素の重なりをヒューリスティックで検出し、スクリーンショットを残します。
+2. 実機（リリース前）: iPhone の Safari / Android の Chrome で人が確認し、「手動/実機」に結果と写真を記録します。エミュレーションは実機の Safari / Chrome と完全には一致しません（実機確認.txt）。
+
+■ Mobile suite の作り方
+1. シナリオに「responsive_check」と「assert_no_horizontal_scroll」を入れる（navigate の後）。
+2. Suite「Mobile」を作り、matrix の viewport に desktop + iPhone + Android を並べる（seed の Mobile suite が例）。
+3. 実行すると viewport ごとに結果が出ます。デスクトップは pass、iPhone だけ fail、のように切り分けられます。
+
+■ 何が検出されるか（responsive_check）
+- horizontal_overflow: ページ幅が viewport より広い（横スクロールが発生）
+- cta_offscreen: ボタン / リンク（role=button/link で目立つもの）が画面外
+- tiny_text: 極端に小さい文字
+- fixed_overlap: 固定ヘッダー / フッターが主要コンテンツに重なる
+- tap_target_small: タップ領域が小さい（警告）
+検出は evidence（スクリーンショット + 要素の位置情報）付きです。ヒューリスティックなので、意図したデザインなら assertion を外す / ignore に入れてください。
+
+■ Visual（画像比較）をスマホでも使う
+screenshot ステップに visualCheck を付け、Mobile suite でも実行すると viewport ごとに baseline が作られます（Visual Regression.txt）。
+
+■ 実機との違い（重要）
+- iOS Safari 固有の挙動（100vh、position: fixed とキーボード、ダウンロード、PWA）はエミュレーションでは再現しません。
+- WebKit（Playwright）での実行は Safari に近いですが同一ではありません。本開発環境では WebKit / Firefox のブラウザ本体を取得できず未検証です（注意事項.txt）。
+- リリース判定で「iPhone 実機チェック必須」を Gate rule にすると、実機記録がない限り READY になりません。

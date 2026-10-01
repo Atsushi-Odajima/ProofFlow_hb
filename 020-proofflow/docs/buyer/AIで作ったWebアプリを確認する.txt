@@ -1,0 +1,45 @@
+AI で作った Web アプリを確認する
+==============================
+
+Codex / Claude Code / ChatGPT などで生成した Web アプリは「動いているように見えて、肝心なところが壊れている」ことがよくあります。ProofFlow はそれを「実ブラウザで動かして、証跡付きで」見つけるための道具です。
+
+■ 典型的な壊れ方（Sample SaaS に全部仕込んであります）
+1. ログイン失敗時にエラーが出ない（ユーザーは固まる）
+2. 送信ボタン連打で二重登録
+3. 画面は出るが裏の API が 500（コンソールに赤いエラー）
+4. スマホ幅で CTA ボタンが画面外・横スクロール
+5. CSS 変更でボタン位置がずれる
+6. リンク切れ（存在しないページへのリンク）
+7. JavaScript 例外（画面は動くが一部機能が死ぬ）
+8. ダウンロードのファイル名 / 種類が違う
+9. 画像以外のファイルをアップロードできてしまう
+10. アクセシビリティ（ラベルのない入力欄、lang 属性なし）
+11. API のレスポンス形が変わる（型が string → number）
+12. API が遅い
+
+■ 手順（30 分コース）
+1. アプリを staging（または自分の PC）で起動する。本番 URL で試さない（本番は destructive 操作が既定で禁止され、読み取りだけになります）。
+2. ProofFlow で Project と Environment を作る。ログインが必要なら Secret と認証プロファイルを設定する。
+3. 「シナリオ」→「クロール（inventory）」ステップで同一オリジン内のページとフォームを棚卸しする（許可された baseURL の外には出ません）。
+4. 「要件」に受入基準を書く（例: 「誤ったパスワードで送信するとエラーメッセージが表示される」）。
+5. 「AI 下書き」（任意。組織設定で AI を ON にした場合）で要件からシナリオ案を出し、内容を確認して採用する。AI の案は提案に過ぎません。採用した後は普通のシナリオとして編集できます。
+6. 最低限入れるステップ:
+   - assert_console（console error 0 件）… 画面は動くが壊れている、を検知
+   - assert_network（5xx なし）… 裏の API 失敗を検知
+   - link_check … リンク切れ
+   - form_check（必須チェック・二重送信防止）
+   - responsive_check + assert_no_horizontal_scroll を Mobile suite で
+   - accessibility_check（axe）
+   - api_request + expectSchema（JSON schema）… API 契約
+7. Smoke（1〜2 分）と Critical（リリース判定用）に分けて Suite を作る。
+8. 実行 → 失敗した結果の証跡を見る → Defect を作る → AI エージェントに「DEF-3 を直して」と渡す（Defect には再現手順・期待・実際・証跡 ID が入っています。MCP Plugin 経由なら直接読めます）。
+9. 修正後に「再テスト」→ Verified。最後に Critical を全部回して Release Gate を評価する。
+
+■ AI コーディングエージェントとの連携
+- MCP Plugin（ChatGPT-Codex Plugin.txt）: エージェントが run_test_suite / summarize_failures / create_defect_from_failure / retest_defect を使えます。release 承認はできません。
+- CLI: proofflow impact --changed src/pages/login.tsx で変更に関係しそうなシナリオ候補を出し、proofflow run で回します。候補は「候補」で、リリース判定の必須 Suite は必ず全件実行します。
+- エージェント用トークンは developer ロールの service token を推奨（release 承認・baseline 更新・Accepted Risk ができません）。
+
+■ 注意
+- AI が生成したテストが「通った」ことと、要件を満たすことは別です。受入基準を人が書き、assertion が受入基準に対応しているかを確認してください。
+- ProofFlow のステップは typed（型付き）で、任意の JavaScript は実行できません。複雑な操作が必要なときは手動テスト（手動/実機）として記録します。

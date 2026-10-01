@@ -1,0 +1,28 @@
+CI 連携（GitHub Actions など）
+=============================
+
+■ CLI
+  npm install -g @proofflow/cli    # または pnpm --filter @proofflow/cli build して node packages/cli/dist/main.js
+  環境変数: PROOFFLOW_URL（control plane）、PROOFFLOW_TOKEN（service token。CI の secret に保存）
+  コマンド:
+    proofflow run --project my-app --suite critical --env staging --wait --timeout 1800 --fail-on failed --comment-file comment.md
+    proofflow status <runId> [--wait]
+    proofflow gate --project my-app --release 1.2.0
+    proofflow retest --defect DEF-7 --wait
+    proofflow impact --project my-app --changed src/a.ts src/b.ts [--run]
+    proofflow export / import（シナリオ・Suite の定義を JSON で管理）
+    proofflow report --project my-app --release 1.2.0 --out evidence.html
+  終了コード: 0 成功 / 1 失敗 / 2 flaky（--fail-on flaky）/ 3 インフラエラー / 4 使い方・認証 / 5 Gate BLOCKED
+  commit / branch / PR 番号 / build id は GITHUB_SHA / GITHUB_REF / GITHUB_RUN_ID から自動で付きます。秘密情報は出力に含まれません。
+
+■ GitHub Actions
+deploy/github-actions/proofflow.yml をコピーして .github/workflows/ に置き、secrets に PROOFFLOW_URL / PROOFFLOW_TOKEN を登録します。流れ: checkout → CLI 実行（--wait）→ PR にコメント（任意、workflow の GITHUB_TOKEN を使用。ProofFlow は GitHub に書き込みません）→ main では proofflow gate。
+Run の画面と Evidence Report には commit / branch / PR が記録されるので、「どのコミットで通ったか」が後から辿れます。
+
+■ runner はどこで動かすか
+- CI のジョブ内で runner を起動する方式（短命）: ジョブ開始時に PROOFFLOW_RUNNER_TOKEN を渡して pnpm dev:runner を立て、終わったら止める。staging が CI から到達できる必要があります。
+- 常駐 runner 方式: staging に到達できるサーバーで runner を常駐（docker-compose の runner）。CI は API を叩くだけ。
+いずれも runner token は組織単位で、runner はテスト対象へ到達できるネットワークに置きます。control plane 自身はテスト対象へ接続しません（SSRF 対策）。
+
+■ 他の CI
+GitLab CI / CircleCI / Jenkins でも同じ CLI が使えます。必要なのは Node.js 22 と 2 つの環境変数だけです。

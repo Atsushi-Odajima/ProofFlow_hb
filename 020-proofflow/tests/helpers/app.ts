@@ -4,19 +4,36 @@ import { openDb, type Db } from '@proofflow/server/db/db';
 import { migrate } from '@proofflow/server/db/migrate';
 import type { FastifyInstance } from 'fastify';
 import { mkdtempSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 export interface TestApp { app: FastifyInstance; db: Db; cfg: Config; dataDir: string; close(): Promise<void>; }
 
+/**
+ * Test database: in-memory SQLite by default. Set PROOFFLOW_TEST_DATABASE_URL (e.g. postgresql://proofflow:proofflow@127.0.0.1:5432/proofflow_test)
+ * to run the same suite against PostgreSQL — every test app then gets its own schema, dropped on close.
+ */
+const PG_URL = process.env.PROOFFLOW_TEST_DATABASE_URL;
+export const TEST_DB_DIALECT = PG_URL ? 'postgres' : 'sqlite';
+async function openTestDb(): Promise<{ db: Db; cleanup: () => Promise<void> }> {
+  if (!PG_URL) { const db = await openDb({ driver: 'sqlite', sqlitePath: ':memory:' }); return { db, cleanup: () => db.close() }; }
+  const schema = 't_' + randomBytes(6).toString('hex');
+  const admin = await openDb({ driver: 'postgres', url: PG_URL });
+  await admin.run(`CREATE SCHEMA ${schema}`);
+  const u = new URL(PG_URL); u.searchParams.set('options', `-c search_path=${schema}`);
+  const db = await openDb({ driver: 'postgres', url: u.toString() });
+  return { db, cleanup: async () => { await db.close(); await admin.run(`DROP SCHEMA ${schema} CASCADE`); await admin.close(); } };
+}
+
 export async function createTestApp(overrides: Partial<Config> = {}, env: Record<string, string> = {}): Promise<TestApp> {
   const dataDir = mkdtempSync(join(tmpdir(), 'proofflow-test-'));
-  const cfg = loadConfig({ NODE_ENV: 'test', PROOFFLOW_DATA_DIR: dataDir, PROOFFLOW_PUBLIC_URL: 'http://localhost:8080', ...env }, overrides);
-  const db = await openDb({ driver: 'sqlite', sqlitePath: ':memory:' });
+  const cfg = loadConfig({ NODE_ENV: 'test', PROOFFLOW_DATA_DIR: dataDir, PROOFFLOW_PUBLIC_URL: 'http://localhost:8080', ...env }, { dbDriver: TEST_DB_DIALECT, ...overrides });
+  const { db, cleanup } = await openTestDb();
   await migrate(db);
   const app = await buildApp({ cfg, db });
   await app.ready();
-  return { app, db, cfg, dataDir, close: async () => { await app.close(); await db.close(); } };
+  return { app, db, cfg, dataDir, close: async () => { await app.close(); await cleanup(); } };
 }
 
 export interface Session { cookie: string; userId: string; orgId: string; workspaceId: string; email: string; }

@@ -1,0 +1,37 @@
+ChatGPT / Codex / Claude Code から使う（MCP Plugin）
+=================================================
+
+ProofFlow には MCP（Model Context Protocol）server が同梱されています。ChatGPT、Codex CLI、Claude Code などの AI エージェントが、ProofFlow の API を「道具」として使えます。エージェントができるのはテストの実行・結果の要約・不具合の登録・再テスト・Gate の評価までで、リリース承認・baseline 更新・Accepted Risk はできません。
+
+■ 道具（11 個）
+create_project / analyze_test_target / draft_acceptance_tests / create_test_scenario / run_test_suite / get_test_run / summarize_failures / create_defect_from_failure / retest_defect / get_release_gate / prepare_release_evidence
+
+■ 1. トークンを作る
+画面「設定・メンバー・トークン」→ API トークン → 種類「mcp」（または service）、role は developer か tester を推奨、対象 Project を限定（projectIds）。トークンは一度しか表示されません。許可していない Project はエージェントから見えません（404）。
+
+■ 2. Codex CLI
+  codex mcp add proofflow --env PROOFFLOW_URL=https://proofflow.example.com --env PROOFFLOW_TOKEN=pfm_xxx -- proofflow-mcp
+  （proofflow-mcp は pnpm --filter @proofflow/mcp build 後の packages/mcp/dist/main.js。npm link か絶対パスで指定）
+  リモートの HTTP endpoint を使う場合:
+  codex mcp add proofflow --url https://proofflow.example.com:8787/mcp --bearer-token-env-var PROOFFLOW_TOKEN
+
+■ 3. Claude Code
+  claude mcp add proofflow -e PROOFFLOW_URL=... -e PROOFFLOW_TOKEN=... -- node /path/to/packages/mcp/dist/main.js
+
+■ 4. ChatGPT（connector / developer mode）
+  1. control plane と同じホスト、または別ホストで HTTP モードを起動:
+     PROOFFLOW_URL=https://proofflow.example.com PROOFFLOW_MCP_ALLOWED_ORIGINS=https://chatgpt.com pnpm --filter @proofflow/mcp start -- --http
+     （既定ポート 8787、パス /mcp。TLS は reverse proxy で終端）
+  2. ChatGPT 側で connector を追加し、URL に https://<公開ホスト>/mcp、認証に Bearer token（pfm_…）を設定
+  3. 初版は OAuth 2.1 認可サーバーを同梱していません。ChatGPT 側が OAuth 必須の設定の場合は、reverse proxy 側で Bearer を付与するか、Pro 版での OAuth 対応をお待ちください
+  注意: 本製品の開発環境からは ChatGPT の接続画面を確認できていません。最新の手順は OpenAI の公式ドキュメントで確認してください（注意事項.txt）。
+
+■ 使い方の例（会話）
+「staging の my-app を release 前にチェックして」
+→ エージェントは analyze_test_target で Environment と Suite を確認し、destructive なシナリオの有無を確認してから run_test_suite（wait）→ summarize_failures → 必要なら create_defect_from_failure → get_release_gate を呼びます。要約は証跡（artifact id）付きなので、画面で該当の証跡を開けます。
+
+■ 守られること
+- 第三者のサイトはテストできません（Environment として登録され、ドメイン所有確認を通った URL だけ）。
+- production で destructive なシナリオは、confirmDestructive を付けても Environment のポリシーが deny なら拒否されます。
+- 秘密情報（Secret の値）はツールの応答に含まれません。
+- エージェントの操作も監査ログに残ります（actor = token）。

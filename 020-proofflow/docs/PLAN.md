@@ -20,19 +20,19 @@ Project → Environment → Requirement/Acceptance Criteria → Test Scenario �
 ## Phase 計画と状態
 | Phase | 内容 | 状態 |
 |---|---|---|
-| 0 | 公式技術調査、Playwright/runner/Plugin PoC、cost 試算基盤 | 進行中 → PROGRESS.md |
-| 1 | Organization/Workspace/Project/Environment/RBAC/Secret | 未着手 |
-| 2 | Requirement/Scenario/No-code/Suite/AI Draft | 未着手 |
-| 3 | Runner、Browser matrix、Evidence、Trace、Realtime | 未着手 |
-| 4 | Console/Network/Form/File/API | 未着手 |
-| 5 | Visual/Responsive/Accessibility/Link | 未着手 |
-| 6 | Failure grouping、Defect、Retest、Flaky | 未着手 |
-| 7 | RC、Release Gate、Accepted Risk、Evidence Report | 未着手 |
-| 8 | Git/CI/CLI/MCP Plugin/AI coding integration | 未着手 |
-| 9 | Manual Device/Exploratory/Scheduling/Notifications | 未着手 |
-| 10 | Security/domain verification/privacy/retention/audit | 未着手 |
-| 11 | Backup/Restore、load/concurrency、PC/iPhone/Android verification | 未着手 |
-| 12 | docs、deploy、販売前 check | 未着手 |
+| 0 | 公式技術調査、Playwright/runner/Plugin PoC、cost 試算基盤 | 完了 |
+| 1 | Organization/Workspace/Project/Environment/RBAC/Secret | 完了 |
+| 2 | Requirement/Scenario/No-code/Suite/AI Draft | 完了 |
+| 3 | Runner、Browser matrix、Evidence、Trace、Realtime | 完了 |
+| 4 | Console/Network/Form/File/API | 完了 |
+| 5 | Visual/Responsive/Accessibility/Link | 完了 |
+| 6 | Failure grouping、Defect、Retest、Flaky | 完了 |
+| 7 | RC、Release Gate、Accepted Risk、Evidence Report | 完了 |
+| 8 | Git/CI/CLI/MCP Plugin/AI coding integration | 完了 |
+| 9 | Manual Device/Exploratory/Scheduling/Notifications | 完了 |
+| 10 | Security/domain verification/privacy/retention/audit | 完了 |
+| 11 | Backup/Restore、load/concurrency、PC/iPhone/Android verification | 完了（Firefox/WebKit・実機は未検証: TEST_REPORT.md） |
+| 12 | docs、deploy、販売前 check | 完了（Docker build / 実 AI API / ChatGPT connector は人間確認待ち: RELEASE_CHECKLIST.md） |
 
 状態の正は PROGRESS.md。未完成 Phase があれば「全体完成」とは報告しない。
 

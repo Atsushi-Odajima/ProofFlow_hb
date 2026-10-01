@@ -63,3 +63,23 @@
 
 ## D-016 Workspace は Organization 内の論理グループ
 - Role は Organization 単位。Workspace は Project のグルーピング（表示・権限委譲の将来拡張点）。tenant 分離の単位は Organization。
+
+## D-017 Backup は Organization 単位の JSON（schemaVersion / appVersion / checksum）、復元は空環境限定の CLI
+- 理由: 購入者が cron + 1 本の HTTP 呼び出しで取れること。artifact 実体は別層（ストレージ機能）で取る方が安価で確実。
+- 復元を API にしない理由: tenant 境界を越える操作（users テーブル等）で、DB 直結の運用者だけが行うべきもの。既存 org / user が 1 つでもあれば拒否（マージしない）。
+- checksum はテーブル順固定・キー順ソートの正規化 JSON に対する SHA-256。改変検知のみ（署名ではない）。
+
+## D-018 Release Gate の集計対象は「Suite ごとの最新完了 Run」
+- 以前は RC に紐づく全 Run を合算していたため、修正後に再実行しても古い Run の a11y 違反 / infra error が残り続けて永久に BLOCKED になった（Phase 11 のデモで発覚）。
+- 現在: `suite_pass_rate` / `accessibility_max` / `no_infra_errors` は Suite ごとに最新の完了 Run だけを見る。Suite のない ad-hoc Run は個別に数える。`visual_approved` は RC に紐づく全 Run の未レビュー比較を見る（レビューは消えないため）。
+
+## D-019 production の destructive policy 変更は人間のセッション限定
+- `environment:write` + `run:trigger_destructive` に加え、actor が user（cookie session）であることを要求。API / service / MCP token からは 403 `human_required`（E2E-8 で検証）。
+- 理由: AI エージェントが本番破壊テストを自分で解禁できないようにする。
+
+## D-020 maskSelectors はスクリーンショットだけでなく DOM・失敗メッセージ・console/network にも適用
+- 失敗時に masked 要素の現在のテキスト / value を Redactor に登録し、failure（message / expected / actual / stack / locator）、step 記録、console / network の NDJSON、DOM スナップショットから `[masked]` に置換する（E2E-9 で検証）。
+- 理由: `assert_text` の `actual` にページ本文が入り、AI 要約の入力（`ai_suggestions.input_summary`）に PII が流れることが分かったため。video と trace 内スクリーンショットは引き続きマスク不可（既定で失敗時のみ保持）。
+
+## D-021 UI 検証は Chromium のデバイスエミュレーション、実機は人間の確認項目
+- `tests/ui` は PC 1440×900 / iPhone 15 相当 / Pixel 8 相当で全ページを撮影し、page error・console error・横 overflow を機械判定。実機 Safari / Chrome の確認は RELEASE_CHECKLIST.md に残す。

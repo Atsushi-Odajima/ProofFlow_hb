@@ -1,16 +1,42 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true, "composite": false, "declaration": false, "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "paths": {
-      "@proofflow/shared": ["packages/shared/src/index.ts"],
-      "@proofflow/server/*": ["packages/server/src/*"],
-      "@proofflow/runner/*": ["packages/runner/src/*"],
-      "@proofflow/mcp/*": ["packages/mcp/src/*"],
-      "@proofflow/cli/*": ["packages/cli/src/*"],
-      "@proofflow/sample-saas/*": ["packages/sample-saas/src/*"]
-    }
+      "@proofflow/shared": [
+        "packages/shared/src/index.ts"
+      ],
+      "@proofflow/server/*": [
+        "packages/server/src/*.ts"
+      ],
+      "@proofflow/runner/*": [
+        "packages/runner/src/*.ts"
+      ],
+      "@proofflow/mcp/*": [
+        "packages/mcp/src/*.ts"
+      ],
+      "@proofflow/cli/*": [
+        "packages/cli/src/*.ts"
+      ],
+      "@proofflow/sample-saas/*": [
+        "packages/sample-saas/src/*.ts"
+      ]
+    },
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ]
   },
-  "include": ["tests/**/*.ts", "vitest.config.ts", "vitest.e2e.config.ts"]
+  "include": [
+    "tests/**/*.ts",
+    "vitest.config.ts",
+    "vitest.e2e.config.ts",
+    "vitest.load.config.ts",
+    "vitest.ui.config.ts"
+  ]
 }

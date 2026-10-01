@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { ProjectCreate, ProjectUpdate, EnvironmentCreate, EnvironmentUpdate, SecretCreate } from '@proofflow/shared';
 import { z } from 'zod';
+import { HttpError } from '../context.js';
 import { ok, parse, requireOrg, requireProject } from '../http.js';
 
 export async function projectRoutes(app: FastifyInstance) {
@@ -54,7 +55,11 @@ export async function projectRoutes(app: FastifyInstance) {
     const { project } = await requireProject(req, projectId, 'environment:write');
     const env = await app.svc.projects.getEnvironmentRow(envId, project.id);
     const body = parse(EnvironmentUpdate.extend({ confirmProductionDestructive: z.boolean().optional() }), req.body);
-    if (body.destructivePolicy === 'allow' && env.kind === 'production') await requireProject(req, projectId, 'run:trigger_destructive');
+    if (body.destructivePolicy === 'allow' && env.kind === 'production') {
+      // Enabling destructive tests on production is a human decision: QA Lead+ with run:trigger_destructive, never an API/service/MCP token.
+      await requireProject(req, projectId, 'run:trigger_destructive');
+      if (req.ctx.actor.kind !== 'user') throw new HttpError(403, 'human_required', 'enabling destructive tests on production requires a human user session (not an API token)');
+    }
     return ok(reply, await app.svc.projects.updateEnvironment(req.ctx, project, env, body));
   });
   app.delete('/api/v1/projects/:projectId/environments/:envId', async (req, reply) => {

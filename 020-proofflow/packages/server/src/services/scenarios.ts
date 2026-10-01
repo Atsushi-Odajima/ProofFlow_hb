@@ -26,7 +26,7 @@ export class ScenarioService {
     const rows = await this.db.all<ScenarioRow>(`SELECT s.* FROM scenarios s WHERE ${where.join(' AND ')} ORDER BY s.id DESC LIMIT ?`, params);
     return Promise.all(rows.map(async (r) => scenarioView(r, await this.requirementIds(r.id))));
   }
-  private async requirementIds(scenarioId: string) { return (await this.db.all<{ requirement_id: string }>(`SELECT requirement_id FROM scenario_requirements WHERE scenario_id = ?`, [scenarioId])).map((x) => x.requirement_id); }
+  private async requirementIds(scenarioId: string) { return (await this.db.all<{ requirement_id: string }>(`SELECT requirement_id FROM scenario_requirements WHERE scenario_id = ? ORDER BY requirement_id`, [scenarioId])).map((x) => x.requirement_id); }
   async getRow(id: string, projectId?: string): Promise<ScenarioRow> {
     const s = await this.db.get<ScenarioRow>(`SELECT * FROM scenarios WHERE id = ?`, [id]);
     if (!s || (projectId && s.project_id !== projectId)) throw notFound('scenario');

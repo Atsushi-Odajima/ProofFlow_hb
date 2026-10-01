@@ -1,6 +1,23 @@
 NEXT_STEPS.txt — 次にやること（上から順）
 
-1. Phase 1: shared パッケージ（RBAC / step schema / enums）と server の DB 基盤・migration・auth・tenant API を実装し、必須テスト 1,2,3,4 を通す。
-2. Phase 2: Requirement / Scenario / Suite / AI Draft。
-3. Phase 3: Runner と evidence。
-（以降 PLAN.md の Phase 順）
+開発（Phase 0〜12）は完了。以下は販売者（人間）が行う確認と、初版出荷後の候補です。
+
+A. 販売前に人間が確認する（docs/RELEASE_CHECKLIST.md の A〜D）
+1. Firefox / WebKit をインストールして `pnpm test` に firefox / webkit matrix を追加し実行する（本環境では Chromium 141 のみ）。
+2. iPhone Safari / Android Chrome の実機で Web UI と Sample SaaS を確認し、「手動/実機」に証跡を残す。
+3. OpenAI / Anthropic の API キーを設定して AI 機能を 1 回ずつ実行し、出力 schema と料金を確認する。
+4. ChatGPT connector（Streamable HTTP）の接続手順を OpenAI 公式ドキュメントで確認し、docs/buyer/ChatGPT-Codex Plugin.txt を更新する。
+5. `docker compose -f deploy/docker-compose.yml build` を実行し、起動〜Critical suite 実行まで通す。
+6. playwright.dev / modelcontextprotocol.io / docs.github.com の最新版を確認し、SOURCE_NOTES.md の日付と版を更新する。
+7. OPERATING_COSTS.md の単価を最新価格表で再計算する。
+
+B. 出荷後の改善候補（初版の範囲外。PLAN.md「Pro 版候補」）
+- S3 互換 object storage adapter の本番検証、Email adapter（SMTP / SES）
+- MCP 用 OAuth 2.1 Authorization Server（ChatGPT connector の認証）
+- 端末ファーム連携、Jira / Linear / Slack / Teams 連携、SSO / SCIM
+- usage quota の強制（現在は計測のみ）
+- Project 単位の部分復元
+
+C. 保守
+- Playwright の更新時は Visual baseline の再承認が必要になることを購入者に案内する。
+- DB migration を追加したら BackupService.TABLES と tests/phase11 を更新する（DEVELOPMENT.md）。

@@ -1,0 +1,56 @@
+5 分で最初のテスト
+==================
+
+前提: Node.js 22、pnpm 10 が入っていること。ターミナルを 4 つ使います。
+
+■ 1. インストールとビルド（初回のみ、3〜5 分）
+  pnpm install
+  npx playwright install chromium
+  pnpm build
+
+■ 2. サーバー（control plane）を起動  … ターミナル 1
+  pnpm dev:server
+  → http://127.0.0.1:8080 で Web 画面が開きます。初回起動時に data/ に鍵が自動生成されます（本番では .env の PROOFFLOW_MASTER_KEY / PROOFFLOW_SIGNING_SECRET を自分で設定）。
+
+■ 3. デモ対象「Sample SaaS」を起動  … ターミナル 2
+  pnpm dev:sample
+  → http://127.0.0.1:4100。意図的なバグ（ログインエラー欠落、二重送信、500、スマホで CTA が画面外、リンク切れ、console 例外、ダウンロード名、画像以外のアップロード受理、アクセシビリティ、API 契約違反、遅い API）が最初から ON になっています。
+
+■ 4. デモデータを投入  … ターミナル 3
+  pnpm seed:sample
+  → 画面に表示される「Web UI login」（メール / パスワード）と「runner token（pfr_...）」を控えます。
+  投入されるもの: Project「Sample SaaS」、Environment「Local (Sample SaaS)」、要件 11 件、シナリオ 16 件、Suite（Smoke / Critical / Visual / Mobile / API / Accessibility）、手動ケース「iPhone smoke」、Release Candidate 1.2.0、無効状態の夜間スケジュール。
+
+■ 5. runner を起動  … ターミナル 4
+  PROOFFLOW_RUNNER_TOKEN=pfr_（控えたトークン） PROOFFLOW_RUNNER_ALLOW_PRIVATE=1 pnpm dev:runner
+  → PROOFFLOW_RUNNER_ALLOW_PRIVATE=1 は「自分の PC 上の 127.0.0.1 をテスト対象にしてよい」という明示です。公開サイトだけを対象にする runner では付けません。
+
+■ 6. 画面でログインして実行
+  1. http://127.0.0.1:8080 を開き、seed が表示したメール / パスワードでログイン
+  2. 左メニュー「テスト実行」→「新しい実行」→ Suite「Critical」、Environment「Local (Sample SaaS)」、Release Candidate「1.2.0」を選び実行
+  3. 進捗がリアルタイムに流れ、数十秒で完了。8 シナリオ中 7 件が失敗します（これが正解です）
+  4. 失敗した行を開くと、どのステップで何が起きたか、スクリーンショット・動画・trace・console・network が見られます
+
+■ 7. 不具合にして、直して、再テスト
+  1. 失敗結果の「不具合を作成」→ Defect（DEF-1 …）が作られ、証跡が紐づきます
+  2. 「修正」の代わりに Sample SaaS のバグを OFF にします:
+     curl -X POST http://127.0.0.1:4100/__sample/bugs -d '{"loginInvalidErrorMissing":false}'
+     （すべて OFF にするなら各キーを false。キー一覧: GET http://127.0.0.1:4100/__sample/bugs）
+  3. Defect を「再テスト待ち」にして「再テスト」→ 通れば Verified、通らなければ Reopened
+
+■ 8. Release Gate を見る
+  左メニュー「リリース」→ 1.2.0 →「Gate を評価」。Critical の失敗が残っていれば BLOCKED。全部直して再実行し、「手動/実機」で iPhone smoke を pass で記録すると READY になります。詳しくは Release Gate.txt。
+
+■ 自分のアプリをテストするには
+  1. 「プロジェクト一覧」→ 新規作成
+  2. 「プロジェクト設定」→ Environment を追加（staging の URL。本番は destructive 操作が既定で禁止）
+     - 公開 URL の場合はドメイン所有確認（DNS TXT / HTML / .well-known）をしないと低負荷モードになります
+     - ログインが必要なら Secret（LOGIN_EMAIL / LOGIN_PASSWORD など）を登録し、認証プロファイルで参照
+  3. 「シナリオ」→ 新規作成（ステップを選んで入力）または「AI 下書き」（AI を有効にした場合）
+  4. 「スイート」→ Smoke / Critical を作る → 「テスト実行」
+
+■ よくあるつまずき
+- runner が「no browsers available」: npx playwright install chromium を実行
+- 実行が queued のまま: runner が起動していない / token の組織が違う / Environment が private IP なのに PROOFFLOW_RUNNER_ALLOW_PRIVATE=1 がない
+- 画面が真っ白: pnpm build（packages/web/dist）が未実行。開発中は pnpm dev:web（:5173）でも可
+- ポートが使われている: PROOFFLOW_PORT=8081 pnpm dev:server

@@ -87,7 +87,7 @@ export class DefectService {
   }
   async get(id: string, projectId: string) {
     const d = await this.getRow(id, projectId);
-    const links = await this.db.all<{ target_type: string; target_id: string }>(`SELECT target_type, target_id FROM defect_links WHERE defect_id = ?`, [id]);
+    const links = await this.db.all<{ target_type: string; target_id: string }>(`SELECT target_type, target_id FROM defect_links WHERE defect_id = ? ORDER BY target_type, target_id`, [id]);
     const history = await this.db.all(`SELECT * FROM defect_history WHERE defect_id = ? ORDER BY id`, [id]);
     const ev = asJson<{ artifactIds: string[]; resultIds: string[] }>(d.evidence_json, { artifactIds: [], resultIds: [] });
     const artifacts = [] as unknown[];
@@ -129,7 +129,7 @@ export class DefectService {
     const steps = asJson<Array<{ type: string; url?: string; target?: unknown; value?: string; text?: string }>>(scenario?.steps_json, []);
     const repro = steps.slice(0, (f?.stepIndex ?? steps.length - 1) + 1).map((s, i) => `${i + 1}. ${s.type}${s.url ? ` ${s.url}` : ''}${s.target ? ` ${JSON.stringify(s.target)}` : ''}${s.value && !/\{\{secret:/.test(s.value) ? ` "${s.value}"` : ''}${s.text ? ` "${s.text}"` : ''}`).join('\n');
     const arts = await this.artifacts.listForResult(r.id);
-    const reqs = await this.db.all<{ requirement_id: string }>(`SELECT requirement_id FROM scenario_requirements WHERE scenario_id = ?`, [r.scenario_id]);
+    const reqs = await this.db.all<{ requirement_id: string }>(`SELECT requirement_id FROM scenario_requirements WHERE scenario_id = ? ORDER BY requirement_id`, [r.scenario_id]);
     const vp = asJson<Viewport>(r.viewport_json, { width: 0, height: 0 });
     return this.create(ctx, p, {
       title: overrides.title ?? `${scenario?.key ?? ''} ${scenario?.title ?? 'scenario'} fails on ${r.browser} ${vp.name ?? `${vp.width}x${vp.height}`}: ${f?.message.slice(0, 80) ?? 'failure'}`.trim(),
@@ -160,7 +160,7 @@ export class DefectService {
   /** Retest: runs the defect's linked scenarios. The resulting run transitions the defect (verified / reopened) on completion. */
   async retest(ctx: Ctx, p: ProjectRow, d: DefectRow, input: { environmentId?: string; matrix?: Record<string, unknown> }, canRunDestructive: boolean) {
     if (d.status !== 'ready_for_retest' && d.status !== 'reopened' && d.status !== 'in_progress' && d.status !== 'triaged' && d.status !== 'new') throw conflict(`defect in status ${d.status} cannot be retested`);
-    const scenarioIds = (await this.db.all<{ target_id: string }>(`SELECT target_id FROM defect_links WHERE defect_id = ? AND target_type = 'scenario'`, [d.id])).map((x) => x.target_id);
+    const scenarioIds = (await this.db.all<{ target_id: string }>(`SELECT target_id FROM defect_links WHERE defect_id = ? AND target_type = 'scenario' ORDER BY target_id`, [d.id])).map((x) => x.target_id);
     if (scenarioIds.length === 0) throw badRequest('defect has no linked scenarios to retest');
     const envId = input.environmentId ?? d.environment_id ?? p.default_environment_id;
     if (!envId) throw badRequest('environmentId required');

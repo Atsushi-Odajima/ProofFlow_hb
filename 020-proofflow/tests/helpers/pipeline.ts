@@ -20,9 +20,9 @@ export interface Pipeline {
   setBugs(bugs: Partial<Record<BugName, boolean>>): Promise<void>;
   close(): Promise<void>;
 }
-export interface RunDetail { id: string; status: string; counts: Record<string, number>; results: Array<{ id: string; scenarioId: string; browser: string; status: string; outcomeDetail: string; attempts: number; failure: { type: string; message: string; stepIndex?: number; stepType?: string; url?: string } | null; fingerprint: string | null; steps: unknown[]; checks: Record<string, unknown[]> | null; consoleSummary: { errors: number; uncaught: number } | null; networkSummary: { status5xx: number; failed: number } | null; metrics: Record<string, number> | null; artifacts: Array<{ id: string; kind: string; label: string | null; contentType: string; sizeBytes: number; restricted: boolean }>; attemptsDetail: Array<{ attempt: number; status: string; failure: unknown }>; scenario: { key: string; title: string } | null; viewport: { width: number; height: number } }>; jobs: Array<{ id: string; status: string; attempt: number; lastError: string | null }>; }
+export interface RunDetail { id: string; status: string; counts: Record<string, number>; results: Array<{ id: string; scenarioId: string; browser: string; status: string; outcomeDetail: string; attempts: number; failure: { type: string; message: string; stepIndex?: number; stepType?: string; url?: string; status?: number; expected?: string; actual?: string } | null; fingerprint: string | null; steps: unknown[]; checks: Record<string, unknown[]> | null; consoleSummary: { errors: number; uncaught: number } | null; networkSummary: { status5xx: number; failed: number } | null; metrics: Record<string, number> | null; artifacts: Array<{ id: string; kind: string; label: string | null; contentType: string; sizeBytes: number; restricted: boolean }>; attemptsDetail: Array<{ attempt: number; status: string; failure: unknown }>; scenario: { key: string; title: string } | null; viewport: { width: number; height: number } }>; jobs: Array<{ id: string; status: string; attempt: number; lastError: string | null }>; }
 
-export async function createPipeline(opts: { overrides?: Partial<Config>; env?: Record<string, string>; bugs?: Partial<Record<BugName, boolean>>; browsers?: string[]; matrix?: Record<string, unknown> } = {}): Promise<Pipeline> {
+export async function createPipeline(opts: { overrides?: Partial<Config>; env?: Record<string, string>; bugs?: Partial<Record<BugName, boolean>>; browsers?: string[]; matrix?: Record<string, unknown>; projectName?: string } = {}): Promise<Pipeline> {
   const t = await createTestApp(opts.overrides ?? {}, opts.env ?? {});
   await t.app.listen({ port: 0, host: '127.0.0.1' });
   const port = (t.app.server.address() as { port: number }).port;
@@ -33,7 +33,7 @@ export async function createPipeline(opts: { overrides?: Partial<Config>; env?: 
   const sampleUrl = `http://127.0.0.1:${samplePort}`;
   const s = await signup(t.app, 'pipeline@a.example', 'Pipeline Org');
   const A = api(t.app, { cookie: s.cookie });
-  const project = await createProject(t.app, s, 'Sample SaaS');
+  const project = await createProject(t.app, s, opts.projectName ?? 'Sample SaaS');
   const envRes = await A.post(`/api/v1/projects/${project.id}/environments`, { name: 'Local', kind: 'local', baseUrl: sampleUrl, allowPrivateNetwork: true, authProfile: { kind: 'password_form', loginUrl: '/login', usernameTarget: { label: 'Email' }, passwordTarget: { label: 'Password' }, submitTarget: { role: 'button', name: 'Log in' }, usernameSecretRef: 'LOGIN_EMAIL', passwordSecretRef: 'LOGIN_PASSWORD', successUrlContains: '/dashboard' } });
   if (envRes.statusCode !== 201) throw new Error('env create failed ' + envRes.body);
   const env = envRes.json().data as { id: string };

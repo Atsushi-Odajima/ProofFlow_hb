@@ -1,0 +1,23 @@
+修正後に再テストする
+====================
+
+■ 流れ
+1. Defect の修正をデプロイする（staging 等）。
+2. Defect を「ready_for_retest（再テスト待ち）」にする。
+3. 「再テスト」を押す（画面 / CLI / MCP / API）。Defect に紐づくシナリオだけを、同じ Environment・同じブラウザ・同じ viewport で実行します。
+4. 通れば Verified、失敗すれば Reopened。再テストの Run は Defect の履歴に残ります。
+5. 関連する Suite（最低 Critical）を全件実行する。「直したつもりで別の場所が壊れた」はこれで見つけます。
+6. 次の Critical / 回帰実行で同じ fingerprint の失敗が再び出ると、Verified / Closed の Defect は自動で Reopened になります。
+
+■ CLI
+  proofflow retest --defect DEF-7 --wait
+  proofflow run --project my-app --suite critical --env staging --wait --fail-on failed
+終了コード: 0 = 成功、1 = 失敗、2 = flaky（--fail-on flaky 指定時）、3 = インフラエラー、5 = Gate BLOCKED。
+
+■ AI コーディングエージェント向け
+- proofflow impact --changed <変更ファイル…> で関係しそうなシナリオの候補を出せます（ファイル名・ルート名・タグの一致によるヒューリスティック + 明示ルール）。候補はあくまで候補で、リリース判定には必須 Suite の全件実行が必要です。
+- MCP の retest_defect / run_test_suite も同じ動きをします。
+
+■ 注意
+- 再テストが通っても「Verified」であり「Closed」ではありません。Closed にするのは QA Lead 以上の人です。
+- 修正前と後で Environment が違うと比較になりません。再テストは Defect が記録された Environment で行います。

@@ -10,7 +10,7 @@
 |---|---|
 | console / pageerror | secret 値の文字列置換 |
 | network | URL の token/key/secret/password/auth/session/sig 系クエリをマスク、`authorization` / `cookie` / `set-cookie` / `x-api-key` / `x-auth-token` / `proxy-authorization` + 環境設定 `redactHeaders` を `[REDACTED]`、body は `captureBodies` opt-in 時のみ（10KB 上限、PII パターン置換） |
-| DOM snapshot | secret 置換 + PII パターン（email / カード様数字 / JWT / API key 形式） |
+| DOM snapshot | `maskSelectors`（環境）に一致する要素はテキスト・value・src/alt/title を `[masked]` に置換してから取得。さらに secret 置換 + PII パターン（email / カード様数字 / JWT / API key 形式）。E2E-9 で検証 |
 | failure message / stack / steps | secret 置換 |
 | trace.zip | `.trace` / `.network` / `.stacks` のテキストエントリと `resources/` を post-process で secret 置換、network header redaction。**trace 内のスクリーンショット画像はマスク不可** |
 | screenshot | `maskSelectors`（環境 + step）で要素をマスク。password 型 input は元々表示されない |

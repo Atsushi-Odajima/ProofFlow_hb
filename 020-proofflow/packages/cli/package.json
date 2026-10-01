@@ -28,5 +28,8 @@
       "types": "./dist/cli.d.ts",
       "import": "./dist/cli.js"
     }
+  },
+  "devDependencies": {
+    "tsx": "4.23.15"
   }
 }

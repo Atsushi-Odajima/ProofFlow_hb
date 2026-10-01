@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
-  "bin": { "proofflow-runner": "./dist/main.js" },
+  "bin": {
+    "proofflow-runner": "./dist/main.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -20,5 +22,8 @@
     "jszip": "3.10.2",
     "ajv": "8.17.1"
   },
-  "devDependencies": { "@types/pngjs": "6.0.5" }
+  "devDependencies": {
+    "@types/pngjs": "6.0.5",
+    "tsx": "4.23.15"
+  }
 }

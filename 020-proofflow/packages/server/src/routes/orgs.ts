@@ -56,4 +56,20 @@ export async function orgRoutes(app: FastifyInstance) {
     const q = req.query as Record<string, string | undefined>;
     return ok(reply, await app.svc.audit.list(orgId, { limit: q.limit ? Number(q.limit) : undefined, cursor: q.cursor, targetType: q.targetType, targetId: q.targetId, action: q.action, projectId: q.projectId }));
   });
+  /** Organization metadata backup (JSON). Admin/Owner only; audited. Artifact binaries are backed up separately. */
+  app.get('/api/v1/orgs/:orgId/backup', async (req, reply) => {
+    const { orgId } = req.params as { orgId: string };
+    await requireOrg(req, orgId, 'backup:export');
+    const doc = await app.svc.backup.export(req.ctx, orgId);
+    const fname = `proofflow-backup-${doc.organization.slug}-${doc.exportedAt.slice(0, 10)}.json`;
+    return reply.header('content-type', 'application/json; charset=utf-8').header('content-disposition', `attachment; filename="${fname}"`).send(JSON.stringify(doc));
+  });
+  /** Validate a backup document (structure + checksum) without restoring. Restore itself is CLI-only (empty environment). */
+  app.post('/api/v1/orgs/:orgId/backup/verify', { bodyLimit: 256 * 1024 * 1024 }, async (req, reply) => {
+    const { orgId } = req.params as { orgId: string };
+    await requireOrg(req, orgId, 'backup:restore');
+    const doc = app.svc.backup.validate(req.body);
+    const pre = await app.svc.backup.preflight(doc);
+    return ok(reply, { valid: true, organization: doc.organization, schemaVersion: doc.schemaVersion, appVersion: doc.appVersion, exportedAt: doc.exportedAt, counts: doc.counts, restorableHere: pre.conflicts.length === 0, conflicts: pre.conflicts });
+  });
 }

@@ -1,0 +1,25 @@
+実機確認（iPhone / Android）
+===========================
+
+■ なぜ必要か
+自動テストは Chromium / Firefox / WebKit と viewport エミュレーションで動きます。実機の Safari / Chrome の挙動（ソフトキーボード、100vh、PWA、通知、カメラ、Bluetooth、決済シート、共有メニュー）は自動化できないか、できても再現性が低いものです。ProofFlow は「人が実機で確認した」ことを証跡付きで記録し、Release Gate のルールにできます。
+
+■ 手動ケースを作る
+「手動/実機」→ 手動ケース: タイトル、カテゴリ（device / bluetooth / camera / push_notification / native_share / payment_sandbox / email_delivery / visual_judgment / accessibility_manual / other）、ラベル（Gate rule と一致させる。例「iPhone smoke」）、手順、期待結果、関連要件。
+チェックリスト（手動確認の観点集）は「手動/実機」画面の「チェックリスト」から参照できます。
+
+■ 実機で確認して記録する
+1. 実機で対象アプリ（staging）を開き、手順どおり確認する。
+2. スクリーンショット / 画面収録を撮る。
+3. 「手動/実機」→ 手動チェックを記録: 端末（例 iPhone 15 (iOS 18.6)）、OS、ブラウザ、結果（pass / fail / blocked / not_run）、メモ、証跡ファイル、対象の Release Candidate。
+4. fail の場合は Defect を作って紐づける。
+証跡は他の artifact と同じ保護（署名 URL、保持期間、restricted）を受けます。
+
+■ Release Gate との関係
+RC のルール「manual_check_required（ラベル: iPhone smoke、端末: iPhone など）」があると、その RC に対して該当ラベルの手動チェックが pass で記録されるまで BLOCKED です。「誰が・いつ・どの端末で」が Evidence Report に載ります。
+
+■ 探索的テスト（Exploratory session）
+時間を区切った自由探索（charter、開始 / 終了、メモ、証跡、見つけた不具合）を記録できます。AI にメモの整理（見出し付け・不具合候補の抽出）を頼めますが、提案に過ぎません。
+
+■ 端末ファームについて
+初版は端末ファーム（BrowserStack 等）との連携を持ちません。自前の端末で確認し記録する方式です。Pro 版候補です。

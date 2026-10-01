@@ -13,7 +13,7 @@ export class RequirementService {
 
   private async withAc(r: RequirementRow) {
     const ac = await this.db.all<{ id: string; order_index: number; format: string; given: string | null; when_: string | null; then_: string | null; text: string | null }>(`SELECT * FROM acceptance_criteria WHERE requirement_id = ? ORDER BY order_index`, [r.id]);
-    const links = await this.db.all<{ scenario_id: string }>(`SELECT scenario_id FROM scenario_requirements WHERE requirement_id = ?`, [r.id]);
+    const links = await this.db.all<{ scenario_id: string }>(`SELECT scenario_id FROM scenario_requirements WHERE requirement_id = ? ORDER BY scenario_id`, [r.id]);
     return { id: r.id, projectId: r.project_id, key: r.key, title: r.title, description: r.description, priority: r.priority, source: r.source, ownerUserId: r.owner_user_id, status: r.status, createdAt: r.created_at, updatedAt: r.updated_at,
       acceptanceCriteria: ac.map((a) => ({ id: a.id, format: a.format, given: a.given, when: a.when_, then: a.then_, text: a.text })), scenarioIds: links.map((l) => l.scenario_id) };
   }

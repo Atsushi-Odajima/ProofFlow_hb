@@ -14,7 +14,7 @@ export default defineConfig({
   },
   test: {
     include: ['tests/**/*.test.ts', 'packages/**/src/**/*.test.ts'],
-    exclude: ['tests/e2e/**', '**/node_modules/**', '**/dist/**'],
+    exclude: ['tests/e2e/**', 'tests/ui/**', 'tests/load/**', '**/node_modules/**', '**/dist/**'],
     environment: 'node',
     testTimeout: 120_000,
     hookTimeout: 120_000,

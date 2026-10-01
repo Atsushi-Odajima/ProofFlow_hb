@@ -1,0 +1,24 @@
+# ProofFlow runner (Playwright browsers). Build from the repository root:
+#   docker build -f deploy/Dockerfile.runner -t proofflow-runner .
+# Base image = Playwright's official image for the pinned Playwright version (Chromium / Firefox / WebKit preinstalled).
+FROM mcr.microsoft.com/playwright:v1.56.1-noble AS build
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json ./
+COPY packages ./packages
+COPY tests/package.json ./tests/package.json
+RUN pnpm install --frozen-lockfile && pnpm --filter @proofflow/shared build && pnpm --filter @proofflow/runner build
+
+FROM mcr.microsoft.com/playwright:v1.56.1-noble
+ENV NODE_ENV=production PROOFFLOW_RUNNER_CONCURRENCY=2 PROOFFLOW_RUNNER_BROWSERS=chromium,firefox,webkit
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
+WORKDIR /app
+COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml /app/.npmrc ./
+COPY --from=build /app/packages/shared/package.json ./packages/shared/package.json
+COPY --from=build /app/packages/shared/dist ./packages/shared/dist
+COPY --from=build /app/packages/runner/package.json ./packages/runner/package.json
+COPY --from=build /app/packages/runner/dist ./packages/runner/dist
+RUN pnpm install --prod --frozen-lockfile --filter @proofflow/runner...
+# The runner never needs root, a shell for test steps, or host paths: steps are typed data interpreted by the runner.
+USER pwuser
+CMD ["node", "packages/runner/dist/main.js"]

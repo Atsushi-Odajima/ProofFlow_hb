@@ -70,6 +70,15 @@ export class JobExecutor {
     const startedAt = new Date().toISOString(); const t0 = Date.now();
     const attemptDir = join(jobDir, `attempt-${attempt}`); mkdirSync(attemptDir, { recursive: true });
     const red = new Redactor(job.secrets, job.environment.privacy.redactHeaders);
+    const maskSel = job.environment.privacy.maskSelectors ?? [];
+    /** Register the texts currently shown by masked elements (PII) so failure messages, step records, console/network and DOM never carry them. */
+    const refreshMasked = async () => {
+      if (!page || !maskSel.length) return;
+      try {
+        const texts = await page.evaluate((sels: string[]) => { const out: string[] = []; for (const s of sels) { try { document.querySelectorAll(s).forEach((el) => { const t = ((el as HTMLElement).innerText || el.textContent || '').trim(); if (t) out.push(t); const v = (el as HTMLInputElement).value; if (typeof v === 'string' && v.trim()) out.push(v.trim()); }); } catch { /* invalid selector */ } } return out.slice(0, 200); }, maskSel);
+        red.addMaskedTexts(texts);
+      } catch { /* page may be gone */ }
+    };
     const evidence = new EvidenceCollector(red, job.environment.noise, job.environment.privacy.captureBodies);
     const videoWanted = job.options.video === 'always' || job.options.video === 'on_failure' || (job.options.video === 'on_retry' && (attempt > 1 || maxAttempts > 1));
     const traceWanted = job.options.trace !== 'off';
@@ -92,7 +101,8 @@ export class JobExecutor {
         const st = Date.now();
         try { await executeStep(sctx, step, i); steps.push({ index: i, type: step.type, status: 'passed', durationMs: Date.now() - st, url: safeUrl(page) }); }
         catch (e) {
-          const info: FailureInfo = e instanceof StepFailure ? e.info : { type: 'script_error', message: red.text(String(e)), stepIndex: i, stepType: step.type };
+          await refreshMasked();
+          const info: FailureInfo = red.failure(e instanceof StepFailure ? e.info : { type: 'script_error', message: red.text(String(e)), stepIndex: i, stepType: step.type });
           steps.push({ index: i, type: step.type, status: 'failed', durationMs: Date.now() - st, message: info.message, url: safeUrl(page) });
           for (let k = i + 1; k < job.scenario.steps.length; k++) steps.push({ index: k, type: job.scenario.steps[k]!.type, status: 'skipped', durationMs: 0 });
           failure = info; break;
@@ -101,14 +111,19 @@ export class JobExecutor {
       metrics = await perfMetrics(page);
     } catch (e) {
       if (e instanceof InfraError) throw e;
-      if (e instanceof StepFailure) failure = e.info; else { const msg = String(e instanceof Error ? e.message : e); if (/Target page, context or browser has been closed|browserContext\.newPage|has been closed/.test(msg)) throw new InfraError(red.text(msg).split('\n')[0]!); failure = { type: 'script_error', message: red.text(msg).slice(0, 1000) }; }
+      if (e instanceof StepFailure) { await refreshMasked(); failure = red.failure(e.info); } else { const msg = String(e instanceof Error ? e.message : e); if (/Target page, context or browser has been closed|browserContext\.newPage|has been closed/.test(msg)) throw new InfraError(red.text(msg).split('\n')[0]!); failure = { type: 'script_error', message: red.text(msg).slice(0, 1000) }; }
     }
     const failed = failure !== null;
     // ---- evidence on failure: screenshot, DOM snapshot ----
     const upload = async (opts: { kind: string; label?: string; stepIndex?: number; contentType: string; path?: string; buffer?: Buffer; restricted?: boolean }) => { try { artifactIds.push(await this.client.uploadArtifact(job.jobId, { ...opts, attempt })); } catch (e) { this.log(`artifact upload failed (${opts.kind}): ${e instanceof Error ? e.message : e}`); } };
     if (page && failed) {
       try { const mask = job.environment.privacy.maskSelectors.map((s) => page!.locator(s)); const shot = await page.screenshot({ fullPage: true, mask, timeout: 15_000, animations: 'disabled' }); await upload({ kind: 'screenshot', label: 'failure', stepIndex: failure!.stepIndex, contentType: 'image/png', buffer: shot }); } catch (e) { this.log(`failure screenshot failed: ${e instanceof Error ? e.message : e}`); }
-      try { const html = red.textPii(await page.content()); await upload({ kind: 'dom', label: 'failure', stepIndex: failure!.stepIndex, contentType: 'text/html', buffer: Buffer.from(html.slice(0, 2_000_000)) }); } catch { /* ignore */ }
+      try {
+        // DOM snapshot: elements matched by the environment's maskSelectors are blanked (text + input values) before capture, like the screenshot mask.
+        const maskSel = job.environment.privacy.maskSelectors ?? [];
+        if (maskSel.length) { try { await page.evaluate((sels: string[]) => { for (const s of sels) { let els: Element[] = []; try { els = Array.from(document.querySelectorAll(s)); } catch { /* bad selector */ } for (const el of els) { el.textContent = '[masked]'; if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) el.value = ''; for (const a of ['value', 'src', 'alt', 'title']) if (el.hasAttribute(a)) el.setAttribute(a, '[masked]'); } } }, maskSel); } catch { /* page may be gone */ } }
+        const html = red.textPii(await page.content()); await upload({ kind: 'dom', label: 'failure', stepIndex: failure!.stepIndex, contentType: 'text/html', buffer: Buffer.from(html.slice(0, 2_000_000)) });
+      } catch { /* ignore */ }
     }
     for (const a of sctx.pendingArtifacts) await upload({ kind: a.kind, label: a.label, stepIndex: a.stepIndex, contentType: a.contentType, buffer: a.buffer, path: a.path });
     // ---- trace / video (only kept when policy says so) ----

@@ -1,0 +1,26 @@
+運用コスト
+==========
+
+ProofFlow は自己ホスト型です。費用は (1) サーバー、(2) ブラウザを動かす runner、(3) 証跡のストレージ、(4) 任意の AI API、(5) バックアップ、で決まります。金額は目安であり、クラウド / AI 事業者の最新価格で再計算してください（詳細: docs/OPERATING_COSTS.md）。
+
+■ 規模別の目安（Critical 8 シナリオ × Chromium × desktop、1 シナリオ 5 秒、失敗率 10%）
+- 月 100 Run: 開発 PC か 2 vCPU の VM 1 台で十分。証跡 1 GB 未満。月 数千円（VM 1 台分）。
+- 月 1,000 Run: control plane 2 vCPU + runner 2〜4 vCPU 1 台。証跡 2〜4 GB。月 5,000〜12,000 円程度。
+- 月 10,000 Run: control plane + PostgreSQL + runner 2〜3 台（必要時起動）。証跡 20〜40 GB。月 15,000〜40,000 円程度 + DB。
+ブラウザ数 × viewport 数で線形に増えます。Firefox / WebKit / モバイル 2 種を毎回回すと 6〜9 倍です。「Critical は毎回 Chromium、フルマトリクスは夜間 / RC のとき」が現実的です。
+
+■ 常時 video / trace は高い
+video: always / trace: always は 1 シナリオあたり 2〜20 MB を毎回生成し、実行時間も 30〜60% 延びます。既定の on_failure（失敗時のみ）のままにしてください。
+
+■ control plane の性能（実測、4 vCPU、SQLite）
+10,000 Run を蓄積した状態でも Run 作成 p95 1.8 ms、ダッシュボード p95 30 ms、4 runner 同時の lease+complete 約 100 job/s。control plane は月 1 万 Run 規模まで 1 台で足ります。ボトルネックはブラウザ実行とストレージです。
+
+■ AI 費用
+既定 OFF。ON にした場合、失敗要約 1 件あたり数千トークン程度。モデル単価により 1 回あたり数円〜数十円。画面「設定 → AI」で回数とトークン数を確認し、月上限を自社で決めてください。
+
+■ 節約の順序
+1. video / trace は失敗時のみ
+2. 保持期間を短く（成功 7 日、失敗 30〜60 日）
+3. Critical だけ毎回、フルマトリクスは夜間
+4. runner は必要時だけ起動（キューは control plane が保持するので止めても失われません）
+5. AI は失敗要約だけ、上限付き

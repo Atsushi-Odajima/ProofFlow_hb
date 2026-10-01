@@ -1,0 +1,34 @@
+個人情報とテストデータ
+======================
+
+■ 原則
+- テストは本番データで行わない。staging / preview / local に偽データ（fixture）を用意する。
+- ProofFlow に本番の個人情報を入れない。Secret Vault には「テスト用アカウント」の資格情報だけを入れる。
+- 証跡（スクリーンショット・DOM・動画・trace・console・network）には画面に出た情報がそのまま入ります。画面に個人情報が出る場合はマスクする。
+
+■ Secret（資格情報）
+- 「プロジェクト設定 → シークレット」に登録。値は AES-256-GCM で暗号化され、画面・API・ログに平文で出ません。
+- シナリオでは {{secret:NAME}} で参照。runner は実行時にだけ値を受け取り、証跡の保存前に値を文字列置換でマスクします（console / network / DOM / 失敗メッセージ / trace.zip 内のテキスト）。
+- バックアップ JSON にも暗号文のまま入ります。復元には同じ PROOFFLOW_MASTER_KEY が必要です。
+
+■ マスク（PII）
+- Environment の maskSelectors に CSS セレクタを指定すると、スクリーンショット・DOM でその要素を塗りつぶし / 置換します（例: #welcome, .customer-email）。
+- redactHeaders に追加のヘッダ名（既定で authorization / cookie / set-cookie はマスク）。
+- captureBodies を OFF（既定）にすると network 証跡にリクエスト / レスポンス本文を保存しません。
+- 証跡を「restricted」にすると artifact:read_restricted 権限（Tester 以上）の人しか開けず、AI にも送られません。
+
+■ AI に何が送られるか
+- 組織設定で AI を ON にした場合のみ、provider（OpenAI / Anthropic）に送信します。既定は OFF で、OFF のとき provider への通信はゼロです。
+- 送るのは: 要件文、シナリオの手順、失敗情報（マスク後）、console / network の要約、DOM の抜粋（マスク後）。sendArtifacts を OFF（既定）にするとスクリーンショット等の画像は送りません。restricted artifact は常に送りません。
+- 送信回数・トークン数・マスク件数は ai_invocations に記録され、画面「設定 → AI」で確認できます。
+
+■ テストデータ
+- test data profile（fixture / seed / factory）と cleanup を Project ごとに持てます。初版は「fixture」（固定データ）が中心で、自動クリーンアップは設計上の枠のみです。
+- アップロードのテストに使うファイルは「プロジェクト設定 → フィクスチャ」に登録（実行ファイルは不可）。runner はホストのパスを参照しません。
+
+■ 保持と削除
+- 保持期間（既定: 成功 7 日、失敗 60 日、リリース証跡 365 日、手動証跡 365 日、baseline 無期限）を過ぎた証跡は自動削除され、署名 URL も無効になります。
+- 組織の削除依頼・個別の証跡削除（artifact:delete、Admin 以上）は監査ログに残ります。
+
+■ 法令
+利用者のサービスの個人情報保護方針・各国法令（個人情報保護法、GDPR 等）に従う責任は購入者にあります。テストで本番の個人データを扱う必要がある場合は、その可否を自社の規程で判断してください。

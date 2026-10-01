@@ -1,0 +1,38 @@
+不具合（Defect）の見方
+======================
+
+■ 失敗 → Failure group → Defect
+- 実行結果が failed になると、失敗の種類・ステップ・URL・メッセージから「fingerprint（指紋）」が作られ、同じ fingerprint は Failure group にまとまります（同じ原因で 10 件失敗しても不具合は 1 件）。
+- 失敗結果の画面で「不具合を作成」を押すと Defect（DEF-1 …）ができ、再現手順（ステップ列）・期待値・実際の値・ブラウザ / viewport・証跡がすべて紐づきます。要件（Requirement）にも自動で紐づくので、traceability（要件 → シナリオ → 結果 → 不具合）が辿れます。
+
+■ failure type（失敗の種類）
+- assertion: 期待した文字 / 要素 / URL / タイトルと違う
+- locator_not_found: 対象の要素が見つからない（UI 変更やセレクタの劣化）
+- timeout: 画面遷移や要素の出現を待てなかった
+- console: console error / uncaught exception（assert_console）
+- network: 5xx / 失敗リクエスト（assert_network）
+- visual: 画像差分
+- responsive: 横スクロール / CTA 画面外など
+- accessibility: axe の違反（指定した impact 以上）
+- link: リンク切れ
+- form: 二重送信防止がない / 必須チェックがない
+- file: アップロード・ダウンロードの検証失敗
+- api_contract: ステータス / JSON schema / 値 / レイテンシの違反
+- infra_error: runner や環境の問題（テストの失敗ではありません。再実行対象）
+
+■ 証跡の読み方
+1. スクリーンショット: 失敗した瞬間の画面
+2. DOM: その時点の HTML（秘密情報・マスク対象はマスク済み）
+3. 動画: 失敗時のみ既定で録画
+4. Trace: Playwright の trace.zip。ローカルで npx playwright show-trace trace.zip を実行すると、ステップごとの画面・ネットワーク・console を時系列で見られます
+5. console / network: JSON。5xx や例外の一覧
+証跡 URL は署名付きで 15 分で失効します。「restricted」にした証跡は artifact:read_restricted 権限を持つ人だけが開けます。
+
+■ ステータス
+new → triaged → in_progress → ready_for_retest → verified → closed、再発すると reopened。Defect を閉じられるのは QA Lead 以上です。
+
+■ Flaky
+retry で通った結果は「Passed after retry」として Flaky に数えられ、passed には混ぜません。「不具合」画面の「Flaky 候補」に、直近の再試行で通った結果がまとまります。Flaky は原因（待ち不足、データ競合、環境）を直すまで Gate で fail 扱い（既定）です。
+
+■ AI の補助（任意）
+失敗結果の画面で「AI 要約」「Defect 下書き」「セレクタ修復案」を頼めます。いずれも提案で、結果・シナリオを書き換えません。セレクタ修復案は人がレビューして適用するまでシナリオに反映されません。

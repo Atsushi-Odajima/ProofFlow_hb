@@ -1,0 +1,26 @@
+Visual Regression（画像比較）
+============================
+
+■ 仕組み
+screenshot ステップに visualCheck: true を付けると、同じシナリオ・同じステップ・同じブラウザ・同じ viewport の「承認済み baseline」とピクセル比較（pixelmatch）します。差分があれば diff 画像を証跡として残し、結果は failed（failure type: visual）になります。
+
+■ 最初の実行
+baseline がない場合は失敗にはならず、「baseline 承認待ち（new_baseline_needed）」になります。「Visual」画面で画像を見て、理由を書いて承認してください。承認できるのは QA Lead 以上（baseline:update 権限）です。Developer / Viewer は承認できません。
+
+■ 差分が出たとき（2 択）
+1. 意図しない変更（バグ）→ 「却下」して理由を書き、Defect を作る。baseline はそのまま。
+2. 意図した変更（デザイン更新）→ 「新しい baseline として承認」して理由（例: PR #42 のデザイン変更）を書く。履歴に「誰が・いつ・なぜ・どの画像からどの画像へ」が残ります。
+AI が baseline を勝手に更新することはありません。11 件以上の一括承認は確認が必要です。
+
+■ Release Gate との関係
+Gate rule「visual_approved」は、リリース候補に紐づく実行の中に「未レビューの差分 / 承認待ち」が 1 件でもあれば BLOCKED にします。レビュー（承認か却下）すれば解消します。
+
+■ 誤検知を減らす
+- maskSelectors（Environment またはステップ）で日時・広告・アバターなど毎回変わる領域を塗りつぶす
+- maxDiffRatio で許容する差分率を少し緩める（既定はごく小さい値）
+- アニメーションは完了を待つ（wait ステップ）/ 画面幅は matrix で固定する
+- フォントの読み込み差は同じ runner 環境で回すことで安定します
+
+■ 制約
+- 比較は同じブラウザ・同じ viewport 同士のみ。Chromium と Firefox の画像は比較しません。
+- baseline 画像は保持期間の対象外（無期限）。不要になったら Visual 画面から削除します。

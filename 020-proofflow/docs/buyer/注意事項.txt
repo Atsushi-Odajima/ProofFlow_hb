@@ -1,0 +1,33 @@
+注意事項（必ずお読みください）
+==============================
+
+■ 本製品の性質
+- ProofFlow はテストの実行・証跡・判定記録のためのソフトウェアであり、品質保証の「証明書」「認証」「保証」を発行するものではありません。Evidence Report は「何を・いつ・どう確認したか」の記録です。
+- WCAG などアクセシビリティ規格への準拠を保証しません。axe による自動検査は一部の違反しか検出できません。
+- セキュリティ診断（ペネトレーションテスト、脆弱性スキャン、負荷攻撃、credential stuffing）は対象外です。
+- AI 機能は「提案」のみです。テスト結果・baseline・期待値・Gate の判定・リリース承認を AI は行いません。
+
+■ テスト対象について
+- 自分が所有・管理するサイト / アプリだけをテストしてください。公開 URL はドメイン所有確認（DNS TXT / HTML / .well-known）を通すまで低負荷モードです。第三者のサイトをテストすることは利用規約違反です。
+- production 環境では、データを変更する（destructive な）シナリオは既定で拒否されます。本番で実行する場合は Environment のポリシー変更（QA Lead 以上の人がログインして確認。API トークン / MCP からは変更不可）と、実行ごとの明示的な許可（allowDestructive + run:trigger_destructive 権限）が必要で、すべて監査ログに残ります。本番決済の実行は対象外です。
+- 内部ネットワーク（localhost / private IP）の対象は、自分で動かす runner に PROOFFLOW_RUNNER_ALLOW_PRIVATE=1 を付け、Environment の kind を local にしたときだけ到達できます。control plane からは接続しません。クラウドのメタデータ endpoint（169.254.169.254）は常に拒否されます。
+
+■ 本開発で検証できていないこと（販売者による確認が必要）
+- Firefox / WebKit の実行: 開発環境でブラウザ本体を取得できず、Chromium 141 のみで検証しました。コードは Playwright の 3 ブラウザに対応しています。
+- iPhone / Android の実機: viewport エミュレーションでの画面確認のみ。実機の Safari / Chrome での確認は行っていません。
+- OpenAI / Anthropic の実 API 呼び出し: 課金が発生するため未実施（モック provider で検証）。
+- ChatGPT connector の接続手順: OpenAI の最新ドキュメントで確認してください。
+- Docker イメージのビルド: 開発環境からレジストリに到達できず未実行。
+- メール通知: adapter の枠のみ。S3 互換ストレージ: interface のみ。
+詳細は docs/RELEASE_CHECKLIST.md と docs/TEST_REPORT.md。
+
+■ データとバックアップ
+- data/（SQLite、証跡、鍵）を失うと復元できません。PROOFFLOW_MASTER_KEY と PROOFFLOW_SIGNING_SECRET は別途安全に保管してください。
+- バックアップ JSON にはパスワードハッシュと暗号化された Secret が含まれます。暗号化ストレージに保存してください。
+
+■ 更新と互換
+- Playwright のバージョンを上げるとスクリーンショットのレンダリングが変わり、Visual の差分が出ることがあります。更新後は baseline の再承認が必要になる場合があります。
+- DB スキーマは migration で自動更新されます。更新前にバックアップを取ってください。
+
+■ ライセンス
+同梱する OSS のライセンスは THIRD_PARTY_NOTICES.txt を参照してください。ブラウザ本体は Playwright が配布するものを各自取得します。

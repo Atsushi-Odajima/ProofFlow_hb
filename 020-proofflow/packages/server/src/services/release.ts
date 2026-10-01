@@ -17,6 +17,13 @@ export const rcView = (r: RCRow) => ({ id: r.id, projectId: r.project_id, versio
 const OPEN_DEFECT_STATUSES = ['new', 'triaged', 'in_progress', 'ready_for_retest', 'reopened'];
 
 /** Release Candidate / Gate / Accepted Risk / Evidence Report. Gate evaluation is deterministic over stored results; AI is never an input or an approver. */
+/** Latest completed run per suite (runs are ordered newest first) plus every ad-hoc run without a suite. */
+function latestRunsPerSuite<T extends { id: string; suite_id: string | null; completed_at: string | null }>(runs: T[]): T[] {
+  const seen = new Set<string>(); const out: T[] = [];
+  for (const r of runs) { if (!r.completed_at) continue; if (!r.suite_id) { out.push(r); continue; } if (seen.has(r.suite_id)) continue; seen.add(r.suite_id); out.push(r); }
+  return out;
+}
+
 export class ReleaseService {
   constructor(private db: Db, private audit: AuditService, private projects: ProjectService, private artifacts: ArtifactService, private visual: VisualService) {}
   notify?: (orgId: string, projectId: string, kind: string, title: string, body: string, link: string, dedupeKey: string) => Promise<void>;
@@ -114,12 +121,14 @@ export class ReleaseService {
         return { rule, pass: latest.result === 'pass', message: `manual check "${rule.label}": ${latest.result} on ${latest.device} (${latest.performed_at})${latest.result === 'pass' ? '' : ' — BLOCKING'}`, evidence: { checkId: latest.id, device: latest.device, tester: latest.tester_user_id, performedAt: latest.performed_at } };
       }
       case 'accessibility_max': {
+        // Only the latest completed run of each suite counts (a re-run after a fix supersedes the failing one); ad-hoc runs count individually.
         let count = 0; const sources: string[] = [];
-        for (const run of runs) { const rows = await this.db.all<{ id: string; checks_json: string | null }>(`SELECT id, checks_json FROM test_results WHERE run_id = ?`, [run.id]); for (const r of rows) { const a11y = asJson<{ accessibility?: Array<{ counts?: Record<string, number> }> }>(r.checks_json, {}).accessibility ?? []; for (const a of a11y) { const n = a.counts?.[rule.impact] ?? 0; if (n) { count += n; sources.push(r.id); } } } }
+        for (const run of latestRunsPerSuite(runs)) { const rows = await this.db.all<{ id: string; checks_json: string | null }>(`SELECT id, checks_json FROM test_results WHERE run_id = ?`, [run.id]); for (const r of rows) { const a11y = asJson<{ accessibility?: Array<{ counts?: Record<string, number> }> }>(r.checks_json, {}).accessibility ?? []; for (const a of a11y) { const n = a.counts?.[rule.impact] ?? 0; if (n) { count += n; sources.push(r.id); } } } }
         return { rule, pass: count <= rule.max, message: `accessibility ${rule.impact} findings: ${count}, max ${rule.max}${count <= rule.max ? '' : ' — BLOCKING'}`, evidence: { resultIds: sources.slice(0, 20) } };
       }
       case 'no_infra_errors': {
-        const n = runIds.length ? Number((await this.db.get<{ c: number }>(`SELECT COUNT(*) AS c FROM test_results WHERE run_id IN (${runIds.map(() => '?').join(',')}) AND status = 'infra_error'`, runIds))?.c ?? 0) : 0;
+        const latestIds = latestRunsPerSuite(runs).map((r) => r.id);
+        const n = latestIds.length ? Number((await this.db.get<{ c: number }>(`SELECT COUNT(*) AS c FROM test_results WHERE run_id IN (${latestIds.map(() => '?').join(',')}) AND status = 'infra_error'`, latestIds))?.c ?? 0) : 0;
         return { rule, pass: n === 0, message: n ? `${n} infrastructure error(s) in release runs — BLOCKING (rerun required)` : 'no infrastructure errors', evidence: { infraErrors: n } };
       }
     }

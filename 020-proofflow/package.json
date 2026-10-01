@@ -19,7 +19,11 @@
     "dev:web": "pnpm --filter @proofflow/web dev",
     "dev:sample": "pnpm --filter @proofflow/sample-saas dev",
     "seed:sample": "pnpm --filter @proofflow/server seed:sample",
-    "lint": "tsc -b --noEmit false -p tsconfig.json"
+    "lint": "tsc -b --noEmit false -p tsconfig.json",
+    "test:load": "vitest run --config vitest.load.config.ts",
+    "test:pg": "PROOFFLOW_TEST_DATABASE_URL=${PROOFFLOW_TEST_DATABASE_URL:-postgresql://proofflow:proofflow@127.0.0.1:5432/proofflow_test} vitest run",
+    "test:ui": "vitest run --config vitest.ui.config.ts",
+    "build:web": "pnpm --filter @proofflow/web build"
   },
   "devDependencies": {
     "@types/node": "22.18.0",
