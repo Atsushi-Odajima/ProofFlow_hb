@@ -4,7 +4,29 @@
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
-  "bin": { "proofflow": "./dist/main.js" },
-  "scripts": { "build": "tsc -p tsconfig.json", "typecheck": "tsc -p tsconfig.json --noEmit", "dev": "tsx src/main.ts" },
-  "dependencies": { "@proofflow/shared": "workspace:*" }
+  "bin": {
+    "proofflow": "./dist/main.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@proofflow/shared": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./api": {
+      "types": "./dist/api.d.ts",
+      "import": "./dist/api.js"
+    },
+    "./cli": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.js"
+    }
+  }
 }

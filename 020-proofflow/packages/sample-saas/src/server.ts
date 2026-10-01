@@ -19,6 +19,7 @@ export function createSampleApp(opts: { bugs?: Partial<Record<BugName, boolean>>
   const sessions = new Map<string, string>();
   const signups: string[] = [];
   let flakyHits = 0;
+  let verifyToken = '';
 
   const layout = (title: string, body: string, extraHead = '') => `<!doctype html><html${bugs.a11yMissingLabel ? '' : ' lang="ja"'}><head><meta charset="utf-8"><title>${title} — Sample SaaS</title><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
@@ -60,6 +61,8 @@ f.addEventListener('submit',function(e){e.preventDefault();${bugs.signupDoubleSu
       if (path === '/__sample/reset') { signups.length = 0; sessions.clear(); flakyHits = 0; return json(res, 200, { ok: true }); }
       if (path === '/flaky') { flakyHits++; const ready = !bugs.flakyPage || flakyHits % 2 === 0; res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); return res.end(layout('Flaky', `<h1>Flaky widget</h1><p id="state">${ready ? 'Ready' : 'Loading…'}</p>`)); }
       if (path === '/__sample/signups') return json(res, 200, { signups });
+      if (path === '/__sample/verify-token' && req.method === 'POST') { verifyToken = (JSON.parse((await readBody(req)).toString() || '{}') as { token?: string }).token ?? ''; return json(res, 200, { ok: true }); }
+      if (path === '/.well-known/proofflow-verify.txt') { res.writeHead(verifyToken ? 200 : 404, { 'content-type': 'text/plain' }); return res.end(verifyToken); }
       if (path === '/logo.png') { res.writeHead(200, { 'content-type': 'image/png' }); return res.end(PNG_1x1); }
       if (path === '/login' && req.method === 'POST') {
         const body = new URLSearchParams((await readBody(req)).toString());

@@ -31,6 +31,16 @@ export function isBlockedHostname(hostname: string): boolean {
   return false;
 }
 
+/** Hosts that are never reachable from ProofFlow, regardless of allowPrivateNetwork (cloud metadata, link-local). */
+export function isAlwaysDenied(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/\.$/, '');
+  if (h === 'metadata' || h === 'metadata.google.internal' || h.endsWith('.metadata.internal')) return true;
+  const v = isIP(h);
+  if (v === 4) return (v4ToInt(h) >>> 16) === (v4ToInt('169.254.0.0') >>> 16);
+  if (v === 6) { const l = h.toLowerCase(); return l === 'fd00:ec2::254' || l.startsWith('fe80') && false; }
+  return false;
+}
+
 /** Static policy check for a target URL. Resolved-IP checks happen in the runner (DNS rebinding guard). */
 export function checkTargetUrl(raw: string, policy: UrlPolicy = {}): UrlPolicyResult {
   let u: URL;
@@ -42,6 +52,7 @@ export function checkTargetUrl(raw: string, policy: UrlPolicy = {}): UrlPolicyRe
     const ok = policy.allowedHosts.some((a) => host === a.toLowerCase() || host.endsWith('.' + a.toLowerCase()));
     if (!ok) return { allowed: false, reason: 'host_not_in_allowlist', hostname: host };
   }
+  if (isAlwaysDenied(host)) return { allowed: false, reason: 'metadata_or_link_local_denied', hostname: host };
   if (isBlockedHostname(host) && !policy.allowPrivateNetwork) return { allowed: false, reason: 'private_or_local_target_denied', hostname: host };
   return { allowed: true, hostname: host };
 }

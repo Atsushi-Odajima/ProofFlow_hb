@@ -19,6 +19,7 @@ import { defectRoutes } from './routes/defects.js';
 import { releaseRoutes } from './routes/release.js';
 import { manualRoutes } from './routes/manual.js';
 import { integrationRoutes } from './routes/integration.js';
+import { opsRoutes } from './routes/ops.js';
 import { APP_VERSION } from '@proofflow/shared';
 
 export interface AppOptions { cfg: Config; db: Db; logger?: boolean; services?: Services; aiProvider?: import('./ai/provider.js').AiProvider; }
@@ -68,7 +69,11 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     return reply.code(500).send({ error: { code: 'internal_error', message: 'internal error', requestId: req.id } });
   });
 
-  if (opts.cfg.scheduler.enabled) { const t = setInterval(() => { svc.runs.sweepExpiredLeases().catch((e) => app.log.error(e)); }, 30_000); t.unref(); app.addHook('onClose', async () => clearInterval(t)); }
+  if (opts.cfg.scheduler.enabled) {
+    const t = setInterval(() => { svc.runs.sweepExpiredLeases().catch((e) => app.log.error(e)); svc.schedules.tick().catch((e) => app.log.error(e)); }, opts.cfg.scheduler.intervalMs); t.unref();
+    const r = setInterval(() => { svc.artifacts.runRetention().catch((e) => app.log.error(e)); }, 6 * 3600_000); r.unref();
+    app.addHook('onClose', async () => { clearInterval(t); clearInterval(r); });
+  }
   app.get('/api/v1/health', async () => ({ ok: true, version: APP_VERSION, db: svc.db.dialect, time: new Date().toISOString() }));
   await app.register(authRoutes);
   await app.register(orgRoutes);
@@ -83,5 +88,6 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   await app.register(releaseRoutes);
   await app.register(manualRoutes);
   await app.register(integrationRoutes);
+  await app.register(opsRoutes);
   return app;
 }
