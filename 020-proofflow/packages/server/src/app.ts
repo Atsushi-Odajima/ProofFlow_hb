@@ -9,13 +9,15 @@ import { HttpError, ANON, type Ctx } from './context.js';
 import { authRoutes, SESSION_COOKIE } from './routes/auth.js';
 import { orgRoutes } from './routes/orgs.js';
 import { projectRoutes } from './routes/projects.js';
+import { testDesignRoutes } from './routes/testdesign.js';
+import { aiRoutes } from './routes/ai.js';
 import { APP_VERSION } from '@proofflow/shared';
 
-export interface AppOptions { cfg: Config; db: Db; logger?: boolean; services?: Services; }
+export interface AppOptions { cfg: Config; db: Db; logger?: boolean; services?: Services; aiProvider?: import('./ai/provider.js').AiProvider; }
 
 export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({ logger: opts.logger ?? false, trustProxy: opts.cfg.trustProxy, bodyLimit: 2 * 1024 * 1024, genReqId: () => randomUUID() });
-  const svc = opts.services ?? createServices(opts.db, opts.cfg);
+  const svc = opts.services ?? (await createServices(opts.db, opts.cfg, { aiProvider: opts.aiProvider }));
   app.decorate('svc', svc);
   app.decorateRequest('ctx', null as unknown as Ctx);
   await app.register(cookie, { secret: opts.cfg.signingSecret });
@@ -62,5 +64,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   await app.register(authRoutes);
   await app.register(orgRoutes);
   await app.register(projectRoutes);
+  await app.register(testDesignRoutes);
+  await app.register(aiRoutes);
   return app;
 }
