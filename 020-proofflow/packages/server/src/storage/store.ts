@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync, unlinkSync } from 'node:fs';
 import { dirname, join, normalize } from 'node:path';
 import { pipeline } from 'node:stream/promises';
-import type { Readable } from 'node:stream';
+import { Readable, Transform } from 'node:stream';
 
 export interface PutResult { sizeBytes: number; sha256: string; }
 /** Object storage abstraction. Local filesystem implementation ships; S3-compatible adapters implement the same interface (ARTIFACT_SECURITY.md). */
@@ -29,7 +29,7 @@ export class LocalArtifactStore implements ArtifactStore {
       hash.update(body); size = body.length;
       await pipeline(Readable.from([body]), createWriteStream(p));
     } else {
-      const counter = new (await import('node:stream')).Transform({ transform(chunk: Buffer, _e, cb) { size += chunk.length; if (size > maxBytes) return cb(new Error('artifact too large')); hash.update(chunk); cb(null, chunk); } });
+      const counter = new Transform({ transform(chunk: Buffer, _e, cb) { size += chunk.length; if (size > maxBytes) return cb(new Error('artifact too large')); hash.update(chunk); cb(null, chunk); } });
       try { await pipeline(body, counter, createWriteStream(p)); } catch (e) { try { unlinkSync(p); } catch { /* ignore */ } throw e; }
     }
     return { sizeBytes: size, sha256: hash.digest('hex') };
@@ -39,5 +39,3 @@ export class LocalArtifactStore implements ArtifactStore {
   stat(key: string) { const p = this.path(key); return existsSync(p) ? { sizeBytes: statSync(p).size } : null; }
   async delete(key: string): Promise<boolean> { const p = this.path(key); if (!existsSync(p)) return false; unlinkSync(p); return true; }
 }
-import { Readable as _R } from 'node:stream'; // keep type import local for Buffer path
-void _R;

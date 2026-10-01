@@ -8,7 +8,8 @@
       "@proofflow/server/*": ["packages/server/src/*"],
       "@proofflow/runner/*": ["packages/runner/src/*"],
       "@proofflow/mcp/*": ["packages/mcp/src/*"],
-      "@proofflow/cli/*": ["packages/cli/src/*"]
+      "@proofflow/cli/*": ["packages/cli/src/*"],
+      "@proofflow/sample-saas/*": ["packages/sample-saas/src/*"]
     }
   },
   "include": ["tests/**/*.ts", "vitest.config.ts", "vitest.e2e.config.ts"]

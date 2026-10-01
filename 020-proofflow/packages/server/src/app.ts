@@ -11,6 +11,8 @@ import { orgRoutes } from './routes/orgs.js';
 import { projectRoutes } from './routes/projects.js';
 import { testDesignRoutes } from './routes/testdesign.js';
 import { aiRoutes } from './routes/ai.js';
+import { runRoutes } from './routes/runs.js';
+import { runnerRoutes } from './routes/runner.js';
 import { APP_VERSION } from '@proofflow/shared';
 
 export interface AppOptions { cfg: Config; db: Db; logger?: boolean; services?: Services; aiProvider?: import('./ai/provider.js').AiProvider; }
@@ -60,11 +62,14 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     return reply.code(500).send({ error: { code: 'internal_error', message: 'internal error', requestId: req.id } });
   });
 
+  if (opts.cfg.scheduler.enabled) { const t = setInterval(() => { svc.runs.sweepExpiredLeases().catch((e) => app.log.error(e)); }, 30_000); t.unref(); app.addHook('onClose', async () => clearInterval(t)); }
   app.get('/api/v1/health', async () => ({ ok: true, version: APP_VERSION, db: svc.db.dialect, time: new Date().toISOString() }));
   await app.register(authRoutes);
   await app.register(orgRoutes);
   await app.register(projectRoutes);
   await app.register(testDesignRoutes);
   await app.register(aiRoutes);
+  await app.register(runRoutes);
+  await app.register(runnerRoutes);
   return app;
 }

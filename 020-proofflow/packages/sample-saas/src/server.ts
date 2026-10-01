@@ -8,7 +8,7 @@
 import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 
-export const BUG_NAMES = ['mobileCtaOffscreen', 'loginInvalidErrorMissing', 'signupDoubleSubmit', 'profileApi500', 'visualButtonShift', 'brokenLink', 'consoleException', 'downloadFilenameError', 'uploadInvalidTypeAccepted', 'a11yMissingLabel', 'apiSchemaBreak', 'slowApi'] as const;
+export const BUG_NAMES = ['mobileCtaOffscreen', 'loginInvalidErrorMissing', 'signupDoubleSubmit', 'profileApi500', 'visualButtonShift', 'brokenLink', 'consoleException', 'downloadFilenameError', 'uploadInvalidTypeAccepted', 'a11yMissingLabel', 'apiSchemaBreak', 'slowApi', 'flakyPage'] as const;
 export type BugName = (typeof BUG_NAMES)[number];
 
 export function createSampleApp(opts: { bugs?: Partial<Record<BugName, boolean>> } = {}) {
@@ -18,6 +18,7 @@ export function createSampleApp(opts: { bugs?: Partial<Record<BugName, boolean>>
   users.set('demo@example.com', { id: 'u_demo', email: 'demo@example.com', name: 'Demo User', password: 'demo-pass-123', plan: 'pro' });
   const sessions = new Map<string, string>();
   const signups: string[] = [];
+  let flakyHits = 0;
 
   const layout = (title: string, body: string, extraHead = '') => `<!doctype html><html${bugs.a11yMissingLabel ? '' : ' lang="ja"'}><head><meta charset="utf-8"><title>${title} — Sample SaaS</title><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
@@ -56,7 +57,8 @@ f.addEventListener('submit',function(e){e.preventDefault();${bugs.signupDoubleSu
         if (req.method === 'POST') { const b = JSON.parse((await readBody(req)).toString() || '{}') as Partial<Record<BugName, boolean>>; for (const [k, v] of Object.entries(b)) if ((BUG_NAMES as readonly string[]).includes(k)) bugs[k as BugName] = !!v; }
         return json(res, 200, bugs);
       }
-      if (path === '/__sample/reset') { signups.length = 0; sessions.clear(); return json(res, 200, { ok: true }); }
+      if (path === '/__sample/reset') { signups.length = 0; sessions.clear(); flakyHits = 0; return json(res, 200, { ok: true }); }
+      if (path === '/flaky') { flakyHits++; const ready = !bugs.flakyPage || flakyHits % 2 === 0; res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); return res.end(layout('Flaky', `<h1>Flaky widget</h1><p id="state">${ready ? 'Ready' : 'Loading…'}</p>`)); }
       if (path === '/__sample/signups') return json(res, 200, { signups });
       if (path === '/logo.png') { res.writeHead(200, { 'content-type': 'image/png' }); return res.end(PNG_1x1); }
       if (path === '/login' && req.method === 'POST') {

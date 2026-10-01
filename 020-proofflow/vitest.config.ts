@@ -9,6 +9,7 @@ export default defineConfig({
       { find: /^@proofflow\/runner\/(.*)$/, replacement: r('./packages/runner/src') + '/$1' },
       { find: /^@proofflow\/mcp\/(.*)$/, replacement: r('./packages/mcp/src') + '/$1' },
       { find: /^@proofflow\/cli\/(.*)$/, replacement: r('./packages/cli/src') + '/$1' },
+      { find: /^@proofflow\/sample-saas\/(.*)$/, replacement: r('./packages/sample-saas/src') + '/$1' },
     ],
   },
   test: {
