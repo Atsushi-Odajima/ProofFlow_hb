@@ -44,6 +44,7 @@ export const StepSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('perf_check'), maxTtfbMs: z.number().int().min(1).optional(), maxLoadMs: z.number().int().min(1).optional(), maxLcpMs: z.number().int().min(1).optional(), ...Base }),
   z.object({ type: z.literal('set_viewport'), width: z.number().int().min(200).max(4000), height: z.number().int().min(200).max(4000), ...Base }),
   z.object({ type: z.literal('login_profile'), ...Base }), // use environment auth profile (password / storage state / magic-link test mode)
+  z.object({ type: z.literal('crawl_inventory'), maxPages: z.number().int().min(1).max(500).default(50), maxDepth: z.number().int().min(0).max(5).default(2), ...Base }), // same-origin crawl within the environment base URL only
 ]);
 export type Step = z.infer<typeof StepSchema>;
 export const StepsSchema = z.array(StepSchema).min(1).max(300);

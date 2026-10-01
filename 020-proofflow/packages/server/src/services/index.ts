@@ -11,9 +11,14 @@ import { AiService, createProviderFromConfig } from './ai.js';
 import { ArtifactService } from './artifacts.js';
 import { RunService } from './runs.js';
 import { LocalArtifactStore, type ArtifactStore } from '../storage/store.js';
+import { FixtureService } from './fixtures.js';
+import { OpenApiService } from './openapi.js';
+import { VisualService } from './visual.js';
+import { asJson } from '../db/db.js';
+import { ulid } from '@proofflow/shared';
 import type { AiProvider } from '../ai/provider.js';
 
-export interface Services { db: Db; cfg: Config; audit: AuditService; auth: AuthService; orgs: OrgService; projects: ProjectService; requirements: RequirementService; scenarios: ScenarioService; ai: AiService; artifacts: ArtifactService; artifactStore: ArtifactStore; fixtureStore: ArtifactStore; runs: RunService; }
+export interface Services { db: Db; cfg: Config; audit: AuditService; auth: AuthService; orgs: OrgService; projects: ProjectService; requirements: RequirementService; scenarios: ScenarioService; ai: AiService; artifacts: ArtifactService; artifactStore: ArtifactStore; fixtureStore: ArtifactStore; runs: RunService; fixtures: FixtureService; openapi: OpenApiService; visual: VisualService; }
 
 export async function createServices(db: Db, cfg: Config, opts: { aiProvider?: AiProvider; artifactStore?: ArtifactStore } = {}): Promise<Services> {
   const audit = new AuditService(db);
@@ -28,5 +33,18 @@ export async function createServices(db: Db, cfg: Config, opts: { aiProvider?: A
   const fixtureStore = new LocalArtifactStore(join(cfg.dataDir, 'fixtures'));
   const artifacts = new ArtifactService(db, cfg, artifactStore, audit);
   const runs = new RunService(db, cfg, audit, projects, scenarios, artifacts);
-  return { db, cfg, audit, auth, orgs, projects, requirements, scenarios, ai, artifacts, artifactStore, fixtureStore, runs };
+  const fixtures = new FixtureService(db, fixtureStore, audit);
+  const openapi = new OpenApiService(db, audit);
+  const visual = new VisualService(db, audit, artifacts);
+  // Result hook: persist visual comparisons and crawl inventory from runner checks.
+  runs.onResult = async (resultId, run, c) => {
+    const r = await runs.getResult(resultId);
+    await visual.ingest(run, resultId, c, r.browser, asJson(r.viewport_json, { width: 0, height: 0 }), r.scenario_id);
+    const crawl = (c.checks as { crawlPages?: Array<{ url: string; status: number; title?: string; forms?: unknown[]; linksCount?: number }> } | null)?.crawlPages;
+    if (crawl?.length) {
+      await db.run(`DELETE FROM crawl_inventory WHERE environment_id = ?`, [run.environment_id]);
+      for (const pg of crawl.slice(0, 2000)) await db.run(`INSERT INTO crawl_inventory (id, org_id, project_id, environment_id, run_id, url, title, status_code, kind, forms_json, links_count, discovered_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`, [ulid(), run.org_id, run.project_id, run.environment_id, run.id, pg.url, pg.title ?? null, pg.status, (pg.forms?.length ?? 0) > 0 ? 'form_page' : 'page', JSON.stringify(pg.forms ?? []), pg.linksCount ?? null, new Date().toISOString()]);
+    }
+  };
+  return { db, cfg, audit, auth, orgs, projects, requirements, scenarios, ai, artifacts, artifactStore, fixtureStore, runs, fixtures, openapi, visual };
 }

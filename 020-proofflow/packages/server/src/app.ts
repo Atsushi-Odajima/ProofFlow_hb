@@ -13,6 +13,8 @@ import { testDesignRoutes } from './routes/testdesign.js';
 import { aiRoutes } from './routes/ai.js';
 import { runRoutes } from './routes/runs.js';
 import { runnerRoutes } from './routes/runner.js';
+import { fixtureRoutes } from './routes/fixtures.js';
+import { visualRoutes } from './routes/visual.js';
 import { APP_VERSION } from '@proofflow/shared';
 
 export interface AppOptions { cfg: Config; db: Db; logger?: boolean; services?: Services; aiProvider?: import('./ai/provider.js').AiProvider; }
@@ -71,5 +73,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   await app.register(aiRoutes);
   await app.register(runRoutes);
   await app.register(runnerRoutes);
+  await app.register(fixtureRoutes);
+  await app.register(visualRoutes);
   return app;
 }

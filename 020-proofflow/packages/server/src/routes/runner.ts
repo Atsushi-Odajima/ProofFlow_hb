@@ -1,9 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { ARTIFACT_KINDS } from '@proofflow/shared';
-import { ok, parse } from '../http.js';
+import { ok, parse, rawBody } from '../http.js';
 import { forbidden, unauthorized } from '../context.js';
-import type { Readable } from 'node:stream';
 
 /** Runner plane protocol. Auth: runner token (kind=runner). The runner never touches the DB or secret vault directly. */
 export async function runnerRoutes(app: FastifyInstance) {
@@ -35,9 +34,7 @@ export async function runnerRoutes(app: FastifyInstance) {
     if (!job || job.org_id !== orgId || job.leased_by !== q.runnerId) throw forbidden('job not leased by this runner');
     const run = await app.svc.runs.getRow(job.run_id);
     const contentType = (req.headers['content-type'] ?? 'application/octet-stream').split(';')[0]!.trim();
-    const body = req.body as Readable | Buffer | string | undefined;
-    const stream = Buffer.isBuffer(body) ? body : typeof body === 'string' ? Buffer.from(body) : (body as Readable);
-    const a = await app.svc.artifacts.create({ orgId, projectId: run.project_id, runId: run.id, attempt: q.attempt ?? null, kind: q.kind, label: q.label ?? null, stepIndex: q.stepIndex ?? null, contentType, body: stream, retentionClass: 'failed', restricted: q.restricted ?? false, createdBy: q.runnerId });
+    const a = await app.svc.artifacts.create({ orgId, projectId: run.project_id, runId: run.id, attempt: q.attempt ?? null, kind: q.kind, label: q.label ?? null, stepIndex: q.stepIndex ?? null, contentType, body: rawBody(req), retentionClass: 'failed', restricted: q.restricted ?? false, createdBy: q.runnerId });
     return ok(reply, { artifactId: a.id }, 201);
   });
   app.post('/runner/v1/jobs/:jobId/complete', async (req, reply) => {

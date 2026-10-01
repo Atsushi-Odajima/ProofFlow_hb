@@ -38,3 +38,13 @@ export async function requireProject(req: FastifyRequest, projectId: string, per
   return { project, role };
 }
 export function userIdOf(req: FastifyRequest): string | null { return req.ctx.actor.userId ?? (req.ctx.actor.kind === 'user' ? req.ctx.actor.id : null); }
+
+/** Body for artifact/fixture uploads: streams and buffers pass through; JSON-parsed bodies (application/json) are re-serialized. */
+export function rawBody(req: FastifyRequest): import('node:stream').Readable | Buffer {
+  const b = req.body as unknown;
+  if (Buffer.isBuffer(b)) return b;
+  if (typeof b === 'string') return Buffer.from(b);
+  if (b && typeof (b as { pipe?: unknown }).pipe === 'function') return b as import('node:stream').Readable;
+  if (b === undefined || b === null) return Buffer.alloc(0);
+  return Buffer.from(JSON.stringify(b));
+}

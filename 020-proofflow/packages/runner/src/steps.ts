@@ -166,7 +166,7 @@ export async function executeStep(ctx: StepContext, step: Step, index: number): 
         }
         if (step.expectDoubleSubmitGuard) {
           const before = ctx.evidence.network.filter((n) => n.method === 'POST').length;
-          await submit.click({ timeout }); await submit.click({ timeout, force: true }).catch(() => undefined);
+          await submit.dblclick({ timeout }); // two click events in quick succession, like an impatient user
           await page.waitForTimeout(800);
           const posts = ctx.evidence.network.filter((n) => n.method === 'POST').length - before;
           const disabledAfter = await submit.isDisabled().catch(() => false);
@@ -188,7 +188,8 @@ export async function executeStep(ctx: StepContext, step: Step, index: number): 
         const [dl] = await Promise.all([page.waitForEvent('download', { timeout: Math.max(timeout, 30_000) }), loc(ctx, step.target).click({ timeout })]);
         const filename = dl.suggestedFilename();
         const resp = [...ctx.evidence.network].reverse().find((n) => n.url.split('?')[0] === ctx.red.url(dl.url()).split('?')[0]);
-        const mime = resp?.mime ?? '';
+        let mime = resp?.mime ?? '';
+        if (!mime) { try { const head = await ctx.context.request.fetch(dl.url(), { method: 'HEAD', timeout: 15_000, failOnStatusCode: false, maxRedirects: 0 }); mime = (head.headers()['content-type'] ?? '').split(';')[0]!.trim(); if (!mime) { const get = await ctx.context.request.fetch(dl.url(), { method: 'GET', timeout: 15_000, failOnStatusCode: false, maxRedirects: 0 }); mime = (get.headers()['content-type'] ?? '').split(';')[0]!.trim(); } } catch { /* keep empty */ } }
         const path = await dl.path().catch(() => null);
         const rec: Record<string, unknown> = { stepIndex: index, filename, mime, url: ctx.red.url(dl.url()), sizeBytes: path ? (await import('node:fs')).statSync(path).size : undefined };
         push('downloads', rec);
@@ -217,6 +218,27 @@ export async function executeStep(ctx: StepContext, step: Step, index: number): 
         return;
       }
       case 'login_profile': { await loginWithProfile(ctx); return; }
+      case 'crawl_inventory': {
+        // BFS within the environment origin only. Third-party hosts are never requested.
+        const origin = new URL(job.environment.baseUrl).origin;
+        const start = page.url() && page.url() !== 'about:blank' ? page.url() : resolveUrl('/', job);
+        const queue: { url: string; depth: number }[] = [{ url: start, depth: 0 }];
+        const seen = new Set<string>(); const pages: Array<Record<string, unknown>> = [];
+        while (queue.length && pages.length < step.maxPages) {
+          const { url, depth } = queue.shift()!;
+          const norm = url.split('#')[0]!; if (seen.has(norm)) continue; seen.add(norm);
+          if (new URL(norm).origin !== origin) continue;
+          let status = 0;
+          try { const res = await page.goto(norm, { waitUntil: 'domcontentloaded', timeout: 20_000 }); status = res?.status() ?? 0; } catch (e) { pages.push({ url: norm, status: 0, error: String(e instanceof Error ? e.message : e).slice(0, 200), depth }); continue; }
+          const info = await page.evaluate(() => ({ title: document.title, links: Array.from(document.querySelectorAll('a[href]')).map((a) => (a as HTMLAnchorElement).href), forms: Array.from(document.querySelectorAll('form')).map((f) => ({ id: f.id || null, action: f.getAttribute('action'), method: (f.getAttribute('method') || 'get').toLowerCase(), fields: Array.from(f.querySelectorAll('input,select,textarea')).map((i) => ({ name: (i as HTMLInputElement).name || null, type: (i as HTMLInputElement).type || i.tagName.toLowerCase(), required: (i as HTMLInputElement).required })) })) }));
+          pages.push({ url: norm, status, title: info.title, depth, formCount: info.forms.length, forms: info.forms, linksCount: info.links.length });
+          if (depth < step.maxDepth) for (const l of info.links) { try { const u = new URL(l); if (u.origin === origin && !seen.has(u.toString().split('#')[0]!)) queue.push({ url: u.toString(), depth: depth + 1 }); } catch { /* ignore */ } }
+        }
+        push('crawl', { stepIndex: index, pages: pages.length, truncated: queue.length > 0 });
+        ctx.pendingArtifacts.push({ kind: 'report', label: 'crawl-inventory', stepIndex: index, contentType: 'application/json', buffer: Buffer.from(JSON.stringify({ origin, pages }, null, 2)) });
+        (ctx.checks.crawlPages ??= []).push(...pages);
+        return;
+      }
       default: fail({ type: 'unknown', message: `unsupported step type ${(step as { type: string }).type}` });
     }
   } catch (e) {
