@@ -20,7 +20,7 @@
 | 1,000 | 1.9 ms（660 run/s） | 211 job/s | 9.2 MB/s | 9.4 ms | 1.6 ms |
 | 10,000 | 1.8 ms（707 run/s） | 98 job/s（lease p95 95 ms） | 6 MB/s | 30 ms | 2.2 ms |
 
-control plane は月 10,000 Run 規模でも 1 台（2 vCPU / 2 GB）で十分です。ボトルネックは常に **ブラウザ実行（runner）** と **動画 / trace のストレージ** です。
+PostgreSQL 16（同一ホスト）では Run 作成 p95 ≈ 12 ms、dashboard p95 ≈ 23 ms、lease+complete ≈ 40 job/s（docs/load-results-postgres.json）。control plane は月 10,000 Run 規模でも 1 台（2 vCPU / 2 GB）で十分です。ボトルネックは常に **ブラウザ実行（runner）** と **動画 / trace のストレージ** です。
 
 ## 試算例（1 Run = Critical suite 8 シナリオ × Chromium × desktop、平均 5 秒/シナリオ、失敗率 10%）
 計算式:

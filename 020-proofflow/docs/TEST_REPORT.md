@@ -7,12 +7,12 @@ Firefox / WebKit のブラウザ本体は本環境で取得できず（CDN 遮�
 | 区分 | コマンド | 結果 |
 |---|---|---|
 | 型検査 | `pnpm typecheck`（7 パッケージ）+ ルート `tsc --noEmit`（tests） | 通過 |
-| 単体〜統合（phase1〜11、SQLite） | `pnpm test` | __FULL_SQLITE__ |
-| 同（PostgreSQL 16） | `pnpm test:pg` | __FULL_PG__ |
-| E2E-1〜10（Chromium、Sample SaaS） | `pnpm test:e2e` | __E2E__ |
+| 単体〜統合（phase1〜11、SQLite） | `pnpm test` | 通過: 11 ファイル / 67 件（最終実行 2026-10-01 12:40 UTC、約 75 秒） |
+| 同（PostgreSQL 16） | `pnpm test:pg` | 通過: phase1〜11 の 67 件 + UI 4 件 = 71 件通過（同一実行に含まれた負荷計測だけが旧既定の 120 秒 timeout で失敗 → 負荷計測は専用設定 `pnpm test:load` に分離し、下記で通過） |
+| E2E-1〜10（Chromium、Sample SaaS） | `pnpm test:e2e` | 通過: 10 / 10（最終実行 2026-10-01 12:38 UTC） |
 | UI 検証 PC / iPhone / Android | `pnpm build:web && pnpm test:ui` | 通過: 19 画面 × 3 viewport = 57 画面、page error 0、console error 0、横 overflow 0（docs/ui-verification/summary.json） |
 | 負荷計測（SQLite ファイル） | `pnpm test:load` | 通過（§4、docs/load-results-sqlite.json） |
-| 負荷計測（PostgreSQL） | `PROOFFLOW_TEST_DATABASE_URL=... pnpm test:load` | __LOAD_PG__ |
+| 負荷計測（PostgreSQL 16） | `PROOFFLOW_TEST_DATABASE_URL=... pnpm test:load` | 通過（§4、docs/load-results-postgres.json） |
 
 ## 2. 必須テスト 1〜38 の対応（すべて自動テストで通過）
 | # | 内容 | テスト |
@@ -83,7 +83,14 @@ Firefox / WebKit のブラウザ本体は本環境で取得できず（CDN 遮�
 
 所見: 10,000 Run でも API は数十 ms 以内。lease は `run_jobs` の queue index を使うが 10,000 件規模で p95 95 ms（SQLite 単一 writer の直列化）。PostgreSQL の結果は §1。1 億 Result 規模は未計測であり、広告しない（負荷目標の設計意識のみ: DATA_MODEL.md）。
 
-PostgreSQL 計測: __LOAD_PG_TABLE__
+PostgreSQL 計測（docs/load-results-postgres.json）:
+| 蓄積 Run 数 | Run 作成 p50 / p95（throughput） | lease+complete（4 runner） | lease p95 | complete p95 | upload p95（MB/s） | dashboard p95 | Run 一覧 50 件 p95 | 失敗 Run 一覧 p95 | Run 詳細 p95 | audit 50 件 p95 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 100 | 7.7 / 12.9 ms（122 run/s） | 63 job/s | 49 ms | 26 ms | 16 ms（21） | 10 ms | 6.7 ms | 3.5 ms | 8.2 ms | 4.3 ms |
+| 1,000 | 8.1 / 12.2 ms（120 run/s） | 43 job/s | 46 ms | 23 ms | 14 ms（19） | 15 ms | 9.2 ms | 7.2 ms | 6.6 ms | 5.3 ms |
+| 10,000 | 6.9 / 11.5 ms（139 run/s） | 40 job/s | 64 ms | 20 ms | 15 ms（20） | 23 ms | 7.0 ms | 3.6 ms | 5.8 ms | 3.4 ms |
+
+所見（PostgreSQL、同一ホスト上のローカル cluster、pool max 10）: 1 リクエストあたりの往復が SQLite より重いため絶対値は 3〜7 倍遅いが、10,000 Run でもすべて数十 ms 以内で、規模に対する劣化はほぼ平坦（10,000 Run の run 一覧・failed 一覧は SQLite より速い）。複数 control plane / 大規模運用は PostgreSQL を前提とする（DECISIONS D-002）。
 
 ## 5. UI 検証（docs/ui-verification/）
 viewport: PC 1440×900、iPhone 15 相当 390×844 @3x（Mobile Safari UA）、Pixel 8 相当 412×915 @2.625x（Chrome Android UA）。ページ: login / projects / dashboard / requirements / scenarios / suites / runs / run-detail（failed・passed・mobile）/ visual / defects / defect-detail / releases / release-detail / manual / schedules / project-settings / org-settings。
