@@ -244,7 +244,7 @@ export async function executeStep(ctx: StepContext, step: Step, index: number): 
   } catch (e) {
     if (e instanceof StepFailure) { e.info.stepIndex = index; e.info.stepType = step.type; e.info.url ??= safeUrl(page); throw e; }
     const msg = ctx.red.text(e instanceof Error ? e.message : String(e));
-    const type = /Timeout .*waiting for|locator.*resolved to|strict mode violation|not found|Target closed|detached/i.test(msg) ? (/strict mode|resolved to/i.test(msg) ? 'locator_not_found' : /Timeout/i.test(msg) ? 'timeout' : 'locator_not_found') : /net::|ERR_|navigation|goto/i.test(msg) ? 'navigation' : 'script_error';
+    const type = /strict mode violation|resolved to \d+ elements/i.test(msg) ? 'locator_not_found' : /Timeout \d+ms exceeded/i.test(msg) ? (/waiting for (locator|getBy|internal:|frameLocator)/is.test(msg) || /\.(click|fill|hover|check|selectOption|press|waitFor|inputValue|innerText|setInputFiles): Timeout/i.test(msg) ? 'locator_not_found' : 'timeout') : /net::|ERR_|navigation|goto/i.test(msg) ? 'navigation' : /Target (page|context|browser).*closed|detached/i.test(msg) ? 'script_error' : 'script_error';
     const tgt = (step as { target?: StepTarget }).target;
     throw new StepFailure({ type, message: msg.split('\n').slice(0, 3).join(' ').slice(0, 1000), stepIndex: index, stepType: step.type, locator: describeTarget(tgt), url: safeUrl(page), stack: e instanceof Error ? ctx.red.text(e.stack ?? '').slice(0, 2000) : undefined });
   }

@@ -10,7 +10,10 @@
     "@proofflow/sample-saas": "workspace:*",
     "jszip": "3.10.2",
     "playwright": "1.56.1",
-    "pngjs": "7.0.0"
+    "pngjs": "7.0.0",
+    "@proofflow/cli": "workspace:*",
+    "@proofflow/mcp": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.31.0"
   },
   "devDependencies": {
     "@types/pngjs": "6.0.5"

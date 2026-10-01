@@ -110,6 +110,10 @@ export class AiService {
     await this.audit.log({ orgId: p.org_id, actor: ctx.actor, action: 'ai.apply', targetType: 'ai_suggestion', targetId: s.id, projectId: p.id, after: { feature: s.feature, createdScenarioIds: created }, ip: ctx.ip });
     return { scenarioIds: created };
   }
+  async markApplied(ctx: Ctx, p: ProjectRow, suggestionId: string, appliedTargetId: string) {
+    await this.db.run(`UPDATE ai_suggestions SET status = 'applied', applied_by = ?, applied_at = ?, applied_target_id = ? WHERE id = ?`, [ctx.actor.id, nowIso(), appliedTargetId, suggestionId]);
+    await this.audit.log({ orgId: p.org_id, actor: ctx.actor, action: 'ai.apply', targetType: 'ai_suggestion', targetId: suggestionId, projectId: p.id, after: { appliedTargetId }, ip: ctx.ip });
+  }
   async usage(orgId: string, period?: string) {
     const p = period ?? nowIso().slice(0, 7);
     return this.db.all(`SELECT feature, provider, status, COUNT(*) AS calls, COALESCE(SUM(input_tokens),0) AS input_tokens, COALESCE(SUM(output_tokens),0) AS output_tokens FROM ai_invocations WHERE org_id = ? AND created_at >= ? GROUP BY feature, provider, status`, [orgId, `${p}-01`]);

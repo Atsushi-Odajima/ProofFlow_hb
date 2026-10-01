@@ -1,0 +1,10 @@
+{
+  "name": "@proofflow/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": { "proofflow-mcp": "./dist/main.js" },
+  "scripts": { "build": "tsc -p tsconfig.json", "typecheck": "tsc -p tsconfig.json --noEmit", "dev": "tsx src/main.ts" },
+  "dependencies": { "@proofflow/shared": "workspace:*", "@proofflow/cli": "workspace:*", "@modelcontextprotocol/sdk": "1.31.0", "zod": "4.6.5" }
+}

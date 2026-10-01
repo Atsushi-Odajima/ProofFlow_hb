@@ -28,6 +28,8 @@ export async function aiRoutes(app: FastifyInstance) {
     const body = parse(z.object({ indexes: z.array(z.number().int().min(0)).max(50).optional(), requirementIds: z.array(z.string()).max(50).optional() }).default({}), req.body ?? {});
     const s = await app.svc.ai.getRow(id, project.id);
     if (s.feature === 'scenario_draft') return ok(reply, await app.svc.ai.applyScenarioDraft(req.ctx, project, id, body));
+    if (s.feature === 'defect_draft') return ok(reply, await app.svc.aiAssist.applyDefectDraft(req.ctx, project, id), 201);
+    if (s.feature === 'selector_repair') { const c = parse(z.object({ candidateIndex: z.number().int().min(0).default(0) }), req.body ?? {}); return ok(reply, await app.svc.aiAssist.applySelectorRepair(req.ctx, project, id, c.candidateIndex)); }
     return reply.code(400).send({ error: { code: 'not_applicable', message: `apply is not supported for feature ${s.feature} via this endpoint` } });
   });
   app.post('/api/v1/projects/:projectId/ai/suggestions/:id/reject', async (req, reply) => {
@@ -37,6 +39,15 @@ export async function aiRoutes(app: FastifyInstance) {
     await app.svc.ai.reject(req.ctx, project, id, body.reason);
     return ok(reply, { rejected: true });
   });
+  // Failure assistance (read-only suggestions; results are never modified)
+  for (const [path, feature] of [['failure-summary', 'failureSummary'], ['defect-draft', 'defectDraft'], ['selector-repair', 'selectorRepair']] as const) {
+    app.post(`/api/v1/results/:resultId/ai/${path}`, async (req, reply) => {
+      const { resultId } = req.params as { resultId: string };
+      const r = await app.svc.runs.getResult(resultId);
+      const { project } = await requireProject(req, r.project_id, 'ai:use');
+      return ok(reply, await app.svc.aiAssist[feature](req.ctx, project, resultId), 201);
+    });
+  }
   app.get('/api/v1/orgs/:orgId/ai/usage', async (req, reply) => {
     const { orgId } = req.params as { orgId: string };
     await requireOrg(req, orgId, 'org:read');

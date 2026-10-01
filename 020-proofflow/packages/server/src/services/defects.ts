@@ -148,9 +148,9 @@ export class DefectService {
     return this.get(d.id, p.id);
   }
   async transition(ctx: Ctx, p: ProjectRow, d: DefectRow, to: DefectStatus, note: string | null, runId: string | null, system: boolean) {
+    if (to === 'verified' && !system) throw forbidden('Verified is set by a passing retest run, not manually (use retest)');
     const allowed = DEFECT_TRANSITIONS[d.status] ?? [];
     if (!allowed.includes(to)) throw conflict(`cannot move defect from ${d.status} to ${to}`);
-    if (to === 'verified' && !system) throw forbidden('Verified is set by a passing retest run, not manually (use retest)');
     const now = nowIso();
     await this.db.run(`UPDATE defects SET status = ?, updated_at = ?, closed_at = CASE WHEN ? IN ('closed','wont_fix') THEN ? ELSE NULL END WHERE id = ?`, [to, now, to, now, d.id]);
     await this.db.run(`INSERT INTO defect_history (id, org_id, defect_id, from_status, to_status, actor_id, actor_kind, note, run_id, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)`, [ulid(), p.org_id, d.id, d.status, to, ctx.actor.id, ctx.actor.kind, note, runId, now]);
@@ -164,8 +164,8 @@ export class DefectService {
     if (scenarioIds.length === 0) throw badRequest('defect has no linked scenarios to retest');
     const envId = input.environmentId ?? d.environment_id ?? p.default_environment_id;
     if (!envId) throw badRequest('environmentId required');
+    if (d.status !== 'ready_for_retest') await this.transition(ctx, p, d, 'ready_for_retest', 'retest requested', null, false);
     const { run } = await this.runs.create(ctx, p, { environmentId: envId, scenarioIds, matrix: input.matrix as never, trigger: 'retest', retestDefectId: d.id, kind: 'retest', label: `Retest ${d.key}` }, { canRunDestructive });
-    if (d.status !== 'ready_for_retest') await this.transition(ctx, p, d, 'ready_for_retest', `retest run ${run.id} queued`, run.id, false);
     return run;
   }
   /** Run completion hook for retest runs. */

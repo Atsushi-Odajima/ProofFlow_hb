@@ -29,7 +29,7 @@ export type RetentionClass = (typeof RETENTION_CLASSES)[number];
 export const DEFECT_STATUSES = ['new', 'triaged', 'in_progress', 'ready_for_retest', 'verified', 'reopened', 'closed', 'wont_fix'] as const;
 export type DefectStatus = (typeof DEFECT_STATUSES)[number];
 export const DEFECT_TRANSITIONS: Record<DefectStatus, DefectStatus[]> = {
-  new: ['triaged', 'in_progress', 'closed', 'wont_fix'],
+  new: ['triaged', 'in_progress', 'ready_for_retest', 'closed', 'wont_fix'],
   triaged: ['in_progress', 'ready_for_retest', 'closed', 'wont_fix'],
   in_progress: ['ready_for_retest', 'triaged', 'wont_fix'],
   ready_for_retest: ['verified', 'reopened', 'in_progress'],
