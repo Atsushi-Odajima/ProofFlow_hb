@@ -62,7 +62,7 @@ export class ScheduleService {
     const cur = await this.get(id, p.id);
     const cron = patch.cron ?? (cur.cron as string); const tz = patch.timezone ?? (cur.timezone as string);
     const next = nextCron(cron, tz); if (!next) throw badRequest('cron never fires within 70 days');
-    await this.db.run(`UPDATE schedules SET cron = ?, timezone = ?, enabled = ?, priority = ?, overlap_policy = ?, label = ?, suite_id = ?, environment_id = ?, next_run_at = ?, updated_at = ? WHERE id = ?`, [cron, tz, (patch.enabled ?? asBool(cur.enabled as number)) ? 1 : 0, patch.priority ?? cur.priority, patch.overlapPolicy ?? cur.overlap_policy, patch.label ?? cur.label, patch.suiteId ?? cur.suite_id, patch.environmentId ?? cur.environment_id, next.toISOString(), nowIso(), id]);
+    await this.db.run(`UPDATE schedules SET cron = ?, timezone = ?, enabled = ?, priority = ?, overlap_policy = ?, label = ?, suite_id = ?, environment_id = ?, next_run_at = ?, updated_at = ? WHERE id = ?`, [cron, tz, (patch.enabled ?? asBool(cur.enabled as number)) ? 1 : 0, patch.priority ?? (cur.priority as number), patch.overlapPolicy ?? (cur.overlap_policy as string), patch.label ?? (cur.label as string | null), patch.suiteId ?? (cur.suite_id as string), patch.environmentId ?? (cur.environment_id as string), next.toISOString(), nowIso(), id]);
     await this.audit.log({ orgId: p.org_id, actor: ctx.actor, action: 'schedule.update', targetType: 'schedule', targetId: id, projectId: p.id, before: { cron: cur.cron, enabled: asBool(cur.enabled as number) }, after: { cron, enabled: patch.enabled ?? asBool(cur.enabled as number) }, ip: ctx.ip });
     return this.get(id, p.id);
   }

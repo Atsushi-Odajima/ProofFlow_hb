@@ -11,6 +11,7 @@ export interface Config {
   cookieSecure: boolean; trustProxy: boolean; disableRateLimit: boolean; allowPrivateTargetsGlobally: boolean;
   retention: { passedDays: number; failedDays: number; releaseDays: number; manualDays: number };
   scheduler: { enabled: boolean; intervalMs: number };
+  webDir?: string;
 }
 
 function readOrCreateKeyFile(dataDir: string, name: string, bytes: number): string {
@@ -41,6 +42,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     allowPrivateTargetsGlobally: env.PROOFFLOW_ALLOW_PRIVATE_TARGETS === '1',
     retention: { passedDays: Number(env.PROOFFLOW_RETENTION_PASSED_DAYS ?? 7), failedDays: Number(env.PROOFFLOW_RETENTION_FAILED_DAYS ?? 60), releaseDays: Number(env.PROOFFLOW_RETENTION_RELEASE_DAYS ?? 365), manualDays: Number(env.PROOFFLOW_RETENTION_MANUAL_DAYS ?? 365) },
     scheduler: { enabled: env.PROOFFLOW_SCHEDULER !== '0' && !isTest, intervalMs: Number(env.PROOFFLOW_SCHEDULER_INTERVAL_MS ?? 30_000) },
+    webDir: env.PROOFFLOW_WEB_DIR,
   };
   return { ...cfg, ...overrides };
 }
