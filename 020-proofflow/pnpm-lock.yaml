@@ -139,6 +139,9 @@ importers:
 
   packages/web:
     dependencies:
+      '@proofflow/shared':
+        specifier: workspace:*
+        version: link:../shared
       react:
         specifier: 19.3.0
         version: 19.3.0

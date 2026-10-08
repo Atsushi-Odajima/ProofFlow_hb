@@ -3,7 +3,7 @@
 ## 何をバックアップするか（3 層）
 | 層 | 内容 | 方法 | 頻度の目安 |
 |---|---|---|---|
-| 1. メタデータ | Organization / Project / Environment / Secret（暗号化済み）/ Requirement / Scenario / Suite / Run・Result・Artifact の**メタデータ** / Visual baseline・比較 / Defect / Release Candidate / Gate 評価 / Accepted Risk / Manual check / Exploratory / Schedule / Notification / AI suggestion / Audit log | `GET /api/v1/orgs/:orgId/backup`（JSON、Owner/Admin、監査記録あり）。UI: 設定 → バックアップ | 毎日（cron） |
+| 1. メタデータ | Organization / Project / Environment / Secret（暗号化済み）/ Requirement / Scenario / Suite / Run・Result・Artifact の**メタデータ** / Visual baseline・比較 / Defect / ProofFlow 不具合報告（bug_reports・bug_report_intakes・bug_report_attachments、マスク済み）/ Release Candidate / Gate 評価 / Accepted Risk / Manual check / Exploratory / Schedule / Notification / AI suggestion / Audit log | `GET /api/v1/orgs/:orgId/backup`（JSON、Owner/Admin、監査記録あり）。UI: 設定 → バックアップ | 毎日（cron） |
 | 2. Artifact 実体 | screenshot / video / trace / DOM / console / network / diff / report / fixture のファイル本体 | `PROOFFLOW_DATA_DIR/artifacts` と `PROOFFLOW_DATA_DIR/fixtures` をファイルシステム / オブジェクトストレージ側でバックアップ（rsync、スナップショット、S3 バージョニング等） | 毎日（増分） |
 | 3. 鍵 | `PROOFFLOW_MASTER_KEY`（Secret Vault）、`PROOFFLOW_SIGNING_SECRET`（署名 URL / cookie） | シークレットマネージャ等に別保管。**鍵がないと Secret は復号できない** | 変更時 |
 
@@ -13,7 +13,7 @@
 ```json
 {
   "format": "proofflow-backup",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "appVersion": "0.1.0",
   "exportedAt": "2026-10-01T12:00:00.000Z",
   "organization": { "id": "...", "slug": "...", "name": "..." },
@@ -58,6 +58,9 @@ rsync -a backup/fixtures/  $PROOFFLOW_DATA_DIR/fixtures/
 - 同じメール / パスワードでログイン可能、Secret は同じ master key で復号可能、Artifact ディレクトリを戻せば証跡ダウンロード可能、Gate を再評価しても同じ判定。
 - 改変 JSON は checksum で拒否、2 回目の復元は「空でない」として拒否、Developer 以下は export 不可。
 - SQLite / PostgreSQL 16 の両方で通過。
+
+## スキーマ版
+- schemaVersion 2（migration `0002_bug_reports`）。schemaVersion 1 の backup も復元可能（不具合報告テーブルが無いだけ）。
 
 ## 既知の制約
 - JSON は一括生成（1 Organization あたり数十万 Run 規模まで想定。それ以上は PostgreSQL の `pg_dump` 併用を推奨）。

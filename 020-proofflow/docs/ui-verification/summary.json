@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T12:32:46.028Z",
+  "generatedAt": "2026-10-08T08:32:00.202Z",
   "chromium": "141.0.7390.37",
   "viewports": [
     {
@@ -33,7 +33,7 @@
       "consoleErrors": [
         "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
       ],
-      "ms": 1001
+      "ms": 954
     },
     {
       "viewport": "pc",
@@ -44,145 +44,178 @@
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 849
+      "ms": 816
     },
     {
       "viewport": "pc",
       "page": "dashboard",
       "path": "docs/ui-verification/pc/dashboard.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/dashboard",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/dashboard",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 859
+      "ms": 846
     },
     {
       "viewport": "pc",
       "page": "requirements",
       "path": "docs/ui-verification/pc/requirements.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/requirements",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/requirements",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 997
+      "ms": 864
     },
     {
       "viewport": "pc",
       "page": "scenarios",
       "path": "docs/ui-verification/pc/scenarios.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/scenarios",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/scenarios",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1286
+      "ms": 879
     },
     {
       "viewport": "pc",
       "page": "suites",
       "path": "docs/ui-verification/pc/suites.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/suites",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/suites",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1006
+      "ms": 865
     },
     {
       "viewport": "pc",
       "page": "runs",
       "path": "docs/ui-verification/pc/runs.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 967
+      "ms": 861
     },
     {
       "viewport": "pc",
       "page": "run-detail-failed",
       "path": "docs/ui-verification/pc/run-detail-failed.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ4M00VDS0E2QSZ5VREFFV",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA57KBZC5WK1K2KMYBNVQ1",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 982
+      "ms": 813
     },
     {
       "viewport": "pc",
       "page": "run-detail-passed",
       "path": "docs/ui-verification/pc/run-detail-passed.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ5QZPGHKD1NH6HBQH40P2",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA64DPMFQCDN2W52NNTFWF",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 886
+      "ms": 808
     },
     {
       "viewport": "pc",
       "page": "run-detail-mobile",
       "path": "docs/ui-verification/pc/run-detail-mobile.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ50N0D9CYFSP3GMN4MJPM",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA5HNZAJANS7NGKGFF0Z4Q",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1044
+      "ms": 815
     },
     {
       "viewport": "pc",
       "page": "visual",
       "path": "docs/ui-verification/pc/visual.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/visual",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/visual",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 840
+      "ms": 807
     },
     {
       "viewport": "pc",
       "page": "defects",
       "path": "docs/ui-verification/pc/defects.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/defects",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/defects",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 958
+      "ms": 867
     },
     {
       "viewport": "pc",
       "page": "defect-detail",
       "path": "docs/ui-verification/pc/defect-detail.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/defects/01M3VQ59B127ZPPTZQNES31A8K",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/defects/01M4DA5S0YWGS8A3RFKTXY861W",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 960
+      "ms": 864
+    },
+    {
+      "viewport": "pc",
+      "page": "bug-reports",
+      "path": "docs/ui-verification/pc/bug-reports.jpg",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/bug-reports",
+      "ok": true,
+      "overflowPx": 0,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "ms": 933
     },
     {
       "viewport": "pc",
       "page": "releases",
       "path": "docs/ui-verification/pc/releases.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/releases",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/releases",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 829
+      "ms": 814
     },
     {
       "viewport": "pc",
       "page": "release-detail",
       "path": "docs/ui-verification/pc/release-detail.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/releases/01M3VQ4K70J4172PY4X3QYY327",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/releases/01M4DA5709RXE04R9PVTQS7GYC",
+      "ok": true,
+      "overflowPx": 0,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "ms": 812
+    },
+    {
+      "viewport": "pc",
+      "page": "manual",
+      "path": "docs/ui-verification/pc/manual.jpg",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/manual",
+      "ok": true,
+      "overflowPx": 0,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "ms": 813
+    },
+    {
+      "viewport": "pc",
+      "page": "schedules",
+      "path": "docs/ui-verification/pc/schedules.jpg",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/schedules",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
@@ -191,36 +224,14 @@
     },
     {
       "viewport": "pc",
-      "page": "manual",
-      "path": "docs/ui-verification/pc/manual.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/manual",
-      "ok": true,
-      "overflowPx": 0,
-      "pageErrors": [],
-      "consoleErrors": [],
-      "ms": 884
-    },
-    {
-      "viewport": "pc",
-      "page": "schedules",
-      "path": "docs/ui-verification/pc/schedules.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/schedules",
-      "ok": true,
-      "overflowPx": 0,
-      "pageErrors": [],
-      "consoleErrors": [],
-      "ms": 888
-    },
-    {
-      "viewport": "pc",
       "page": "project-settings",
       "path": "docs/ui-verification/pc/project-settings.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/settings",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/settings",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 905
+      "ms": 820
     },
     {
       "viewport": "pc",
@@ -231,7 +242,7 @@
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 900
+      "ms": 843
     },
     {
       "viewport": "iphone",
@@ -244,7 +255,7 @@
       "consoleErrors": [
         "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
       ],
-      "ms": 1034
+      "ms": 951
     },
     {
       "viewport": "iphone",
@@ -255,183 +266,194 @@
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1013
+      "ms": 846
     },
     {
       "viewport": "iphone",
       "page": "dashboard",
       "path": "docs/ui-verification/iphone/dashboard.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/dashboard",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/dashboard",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 991
+      "ms": 947
     },
     {
       "viewport": "iphone",
       "page": "requirements",
       "path": "docs/ui-verification/iphone/requirements.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/requirements",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/requirements",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1008
+      "ms": 923
     },
     {
       "viewport": "iphone",
       "page": "scenarios",
       "path": "docs/ui-verification/iphone/scenarios.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/scenarios",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/scenarios",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 997
+      "ms": 945
     },
     {
       "viewport": "iphone",
       "page": "suites",
       "path": "docs/ui-verification/iphone/suites.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/suites",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/suites",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1162
+      "ms": 974
     },
     {
       "viewport": "iphone",
       "page": "runs",
       "path": "docs/ui-verification/iphone/runs.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1197
+      "ms": 1028
     },
     {
       "viewport": "iphone",
       "page": "run-detail-failed",
       "path": "docs/ui-verification/iphone/run-detail-failed.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ4M00VDS0E2QSZ5VREFFV",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA57KBZC5WK1K2KMYBNVQ1",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 998
+      "ms": 895
     },
     {
       "viewport": "iphone",
       "page": "run-detail-passed",
       "path": "docs/ui-verification/iphone/run-detail-passed.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ5QZPGHKD1NH6HBQH40P2",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA64DPMFQCDN2W52NNTFWF",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1072
+      "ms": 894
     },
     {
       "viewport": "iphone",
       "page": "run-detail-mobile",
       "path": "docs/ui-verification/iphone/run-detail-mobile.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ50N0D9CYFSP3GMN4MJPM",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA5HNZAJANS7NGKGFF0Z4Q",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 977
+      "ms": 909
     },
     {
       "viewport": "iphone",
       "page": "visual",
       "path": "docs/ui-verification/iphone/visual.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/visual",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/visual",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 918
+      "ms": 859
     },
     {
       "viewport": "iphone",
       "page": "defects",
       "path": "docs/ui-verification/iphone/defects.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/defects",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/defects",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1034
+      "ms": 917
     },
     {
       "viewport": "iphone",
       "page": "defect-detail",
       "path": "docs/ui-verification/iphone/defect-detail.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/defects/01M3VQ59B127ZPPTZQNES31A8K",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/defects/01M4DA5S0YWGS8A3RFKTXY861W",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1118
+      "ms": 988
+    },
+    {
+      "viewport": "iphone",
+      "page": "bug-reports",
+      "path": "docs/ui-verification/iphone/bug-reports.jpg",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/bug-reports",
+      "ok": true,
+      "overflowPx": 0,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "ms": 1131
     },
     {
       "viewport": "iphone",
       "page": "releases",
       "path": "docs/ui-verification/iphone/releases.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/releases",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/releases",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 932
+      "ms": 874
     },
     {
       "viewport": "iphone",
       "page": "release-detail",
       "path": "docs/ui-verification/iphone/release-detail.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/releases/01M3VQ4K70J4172PY4X3QYY327",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/releases/01M4DA5709RXE04R9PVTQS7GYC",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 993
+      "ms": 914
     },
     {
       "viewport": "iphone",
       "page": "manual",
       "path": "docs/ui-verification/iphone/manual.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/manual",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/manual",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1556
+      "ms": 900
     },
     {
       "viewport": "iphone",
       "page": "schedules",
       "path": "docs/ui-verification/iphone/schedules.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/schedules",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/schedules",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 967
+      "ms": 894
     },
     {
       "viewport": "iphone",
       "page": "project-settings",
       "path": "docs/ui-verification/iphone/project-settings.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/settings",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/settings",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 971
+      "ms": 910
     },
     {
       "viewport": "iphone",
@@ -442,7 +464,7 @@
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 959
+      "ms": 842
     },
     {
       "viewport": "android",
@@ -455,7 +477,7 @@
       "consoleErrors": [
         "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
       ],
-      "ms": 999
+      "ms": 952
     },
     {
       "viewport": "android",
@@ -466,101 +488,79 @@
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 879
+      "ms": 826
     },
     {
       "viewport": "android",
       "page": "dashboard",
       "path": "docs/ui-verification/android/dashboard.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/dashboard",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/dashboard",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1034
+      "ms": 927
     },
     {
       "viewport": "android",
       "page": "requirements",
       "path": "docs/ui-verification/android/requirements.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/requirements",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/requirements",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 889
+      "ms": 893
     },
     {
       "viewport": "android",
       "page": "scenarios",
       "path": "docs/ui-verification/android/scenarios.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/scenarios",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/scenarios",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 945
+      "ms": 896
     },
     {
       "viewport": "android",
       "page": "suites",
       "path": "docs/ui-verification/android/suites.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/suites",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/suites",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 992
+      "ms": 958
     },
     {
       "viewport": "android",
       "page": "runs",
       "path": "docs/ui-verification/android/runs.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1024
+      "ms": 976
     },
     {
       "viewport": "android",
       "page": "run-detail-failed",
       "path": "docs/ui-verification/android/run-detail-failed.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ4M00VDS0E2QSZ5VREFFV",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA57KBZC5WK1K2KMYBNVQ1",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 947
+      "ms": 870
     },
     {
       "viewport": "android",
       "page": "run-detail-passed",
       "path": "docs/ui-verification/android/run-detail-passed.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ5QZPGHKD1NH6HBQH40P2",
-      "ok": true,
-      "overflowPx": 0,
-      "pageErrors": [],
-      "consoleErrors": [],
-      "ms": 919
-    },
-    {
-      "viewport": "android",
-      "page": "run-detail-mobile",
-      "path": "docs/ui-verification/android/run-detail-mobile.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/runs/01M3VQ50N0D9CYFSP3GMN4MJPM",
-      "ok": true,
-      "overflowPx": 0,
-      "pageErrors": [],
-      "consoleErrors": [],
-      "ms": 921
-    },
-    {
-      "viewport": "android",
-      "page": "visual",
-      "path": "docs/ui-verification/android/visual.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/visual",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA64DPMFQCDN2W52NNTFWF",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
@@ -569,80 +569,113 @@
     },
     {
       "viewport": "android",
-      "page": "defects",
-      "path": "docs/ui-verification/android/defects.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/defects",
+      "page": "run-detail-mobile",
+      "path": "docs/ui-verification/android/run-detail-mobile.jpg",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/runs/01M4DA5HNZAJANS7NGKGFF0Z4Q",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 940
+      "ms": 893
+    },
+    {
+      "viewport": "android",
+      "page": "visual",
+      "path": "docs/ui-verification/android/visual.jpg",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/visual",
+      "ok": true,
+      "overflowPx": 0,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "ms": 842
+    },
+    {
+      "viewport": "android",
+      "page": "defects",
+      "path": "docs/ui-verification/android/defects.jpg",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/defects",
+      "ok": true,
+      "overflowPx": 0,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "ms": 916
     },
     {
       "viewport": "android",
       "page": "defect-detail",
       "path": "docs/ui-verification/android/defect-detail.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/defects/01M3VQ59B127ZPPTZQNES31A8K",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/defects/01M4DA5S0YWGS8A3RFKTXY861W",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 1119
+      "ms": 984
+    },
+    {
+      "viewport": "android",
+      "page": "bug-reports",
+      "path": "docs/ui-verification/android/bug-reports.jpg",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/bug-reports",
+      "ok": true,
+      "overflowPx": 0,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "ms": 1071
     },
     {
       "viewport": "android",
       "page": "releases",
       "path": "docs/ui-verification/android/releases.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/releases",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/releases",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 908
+      "ms": 839
     },
     {
       "viewport": "android",
       "page": "release-detail",
       "path": "docs/ui-verification/android/release-detail.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/releases/01M3VQ4K70J4172PY4X3QYY327",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/releases/01M4DA5709RXE04R9PVTQS7GYC",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 889
+      "ms": 867
     },
     {
       "viewport": "android",
       "page": "manual",
       "path": "docs/ui-verification/android/manual.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/manual",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/manual",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 978
+      "ms": 903
     },
     {
       "viewport": "android",
       "page": "schedules",
       "path": "docs/ui-verification/android/schedules.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/schedules",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/schedules",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 907
+      "ms": 869
     },
     {
       "viewport": "android",
       "page": "project-settings",
       "path": "docs/ui-verification/android/project-settings.jpg",
-      "url": "/projects/01M3VQ4JQXJSQYZVDCKJWTRJNQ/settings",
+      "url": "/projects/01M4DA56VXAH76J9C6P2CF290P/settings",
       "ok": true,
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 929
+      "ms": 906
     },
     {
       "viewport": "android",
@@ -653,7 +686,7 @@
       "overflowPx": 0,
       "pageErrors": [],
       "consoleErrors": [],
-      "ms": 921
+      "ms": 851
     }
   ]
 }

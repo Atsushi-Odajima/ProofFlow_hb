@@ -85,7 +85,7 @@ describe('Phase 8: MCP plugin (E2E-6 / 必須テスト35)', () => {
     return { client, server };
   }
   const text = (r: unknown) => ((r as { content: Array<{ text: string }> }).content[0]?.text ?? '');
-  it('lists the 11 tools and runs the release-check flow: analyze → run → summarize → gate', async () => {
+  it('lists the 12 tools and runs the release-check flow: analyze → run → summarize → gate', async () => {
     const { client, server } = await connect(token);
     const tools = await client.listTools();
     expect(tools.tools.map((t) => t.name).sort()).toEqual([...TOOL_NAMES].sort());

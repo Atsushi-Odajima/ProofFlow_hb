@@ -10,7 +10,7 @@ export const badRequest = (msg: string, details?: unknown) => new HttpError(400,
 export const conflict = (msg: string) => new HttpError(409, 'conflict', msg);
 export const unauthorized = (msg = 'authentication required') => new HttpError(401, 'unauthorized', msg);
 
-export type ActorKind = 'user' | 'token' | 'runner' | 'system' | 'anonymous';
+export type ActorKind = 'user' | 'token' | 'runner' | 'system' | 'anonymous' | 'intake';
 export interface Actor {
   kind: ActorKind;
   id: string | null;            // user id (user) or token id (token/runner)

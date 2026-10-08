@@ -103,4 +103,19 @@ export const MIGRATIONS: { id: string; sql: string[] }[] = [
       `CREATE TABLE IF NOT EXISTS backups (id TEXT PRIMARY KEY, org_id TEXT NOT NULL, artifact_id TEXT, schema_version INTEGER NOT NULL, app_version TEXT NOT NULL, checksum TEXT NOT NULL, size_bytes BIGINT NOT NULL, created_by TEXT, created_at TEXT NOT NULL, restored_at TEXT)`,
     ],
   },
+  {
+    // ProofFlow 不具合報告 (merged from ErrorRelay): intake endpoints, reports (already masked), pending attachments.
+    id: '0002_bug_reports',
+    sql: [
+      `CREATE TABLE IF NOT EXISTS bug_report_intakes (id TEXT PRIMARY KEY, org_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE, name TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, token_prefix TEXT NOT NULL, default_severity TEXT NOT NULL, default_priority TEXT NOT NULL, release_candidate_id TEXT, environment_id TEXT, max_per_hour INTEGER NOT NULL DEFAULT 30, last_used_at TEXT, created_by TEXT, created_at TEXT NOT NULL, revoked_at TEXT)`,
+      `CREATE INDEX IF NOT EXISTS ix_bug_intakes_project ON bug_report_intakes(org_id, project_id)`,
+      `CREATE TABLE IF NOT EXISTS bug_reports (id TEXT PRIMARY KEY, org_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE, key TEXT NOT NULL, source TEXT NOT NULL, intake_id TEXT, idempotency_key TEXT NOT NULL, status TEXT NOT NULL, title TEXT NOT NULL, language TEXT NOT NULL, release_candidate_id TEXT, environment_id TEXT, defect_id TEXT, content_json TEXT NOT NULL, redaction_json TEXT NOT NULL, findings_json TEXT, similar_json TEXT, attachment_ids_json TEXT, report_ja TEXT NOT NULL, report_en TEXT NOT NULL, reporter_kind TEXT NOT NULL, reporter_id TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS ux_bug_reports_idem ON bug_reports(project_id, idempotency_key)`,
+      `CREATE INDEX IF NOT EXISTS ix_bug_reports_project ON bug_reports(org_id, project_id, created_at)`,
+      `CREATE INDEX IF NOT EXISTS ix_bug_reports_intake ON bug_reports(intake_id, created_at)`,
+      `CREATE TABLE IF NOT EXISTS bug_report_attachments (artifact_id TEXT PRIMARY KEY, org_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE, bug_report_id TEXT, intake_id TEXT, uploaded_by TEXT, file_name TEXT NOT NULL, content_type TEXT NOT NULL, processing_json TEXT, created_at TEXT NOT NULL)`,
+      `CREATE INDEX IF NOT EXISTS ix_bug_attachments_report ON bug_report_attachments(bug_report_id)`,
+      `CREATE INDEX IF NOT EXISTS ix_bug_attachments_intake ON bug_report_attachments(intake_id, created_at)`,
+    ],
+  },
 ];

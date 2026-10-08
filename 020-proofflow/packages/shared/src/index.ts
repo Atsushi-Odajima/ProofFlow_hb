@@ -6,5 +6,6 @@ export * from './schemas.js';
 export * from './url-policy.js';
 export * from './fingerprint.js';
 export * from './redact.js';
+export * as bugreport from './bugreport/index.js';
 export const APP_VERSION = '0.1.0';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;

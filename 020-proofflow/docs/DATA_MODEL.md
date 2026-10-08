@@ -1,6 +1,6 @@
 # DATA_MODEL.md — データモデル
 
-DDL の正本は `packages/server/src/db/schema.ts`（migration `0001_init`、SQLite / PostgreSQL 共通）。ID はアプリ生成 ULID（時系列ソート可能）、boolean は INTEGER 0/1、時刻は ISO-8601 UTC TEXT、構造化データは `*_json` TEXT。
+DDL の正本は `packages/server/src/db/schema.ts`（migration `0001_init`、`0002_bug_reports`、SQLite / PostgreSQL 共通。SCHEMA_VERSION 2）。ID はアプリ生成 ULID（時系列ソート可能）、boolean は INTEGER 0/1、時刻は ISO-8601 UTC TEXT、構造化データは `*_json` TEXT。
 
 ## テナント境界
 `organizations` が tenant。tenant 配下の全テーブルは `org_id` を持ち、複合インデックスは `org_id` 先頭（例: `ix_runs_project_created(org_id, project_id, created_at)`）。API は `requireOrg` / `requireProject` で org を解決し、他 org の ID は 404 を返す。
@@ -17,6 +17,7 @@ organizations ─┬─ users (org_members: role)      api_tokens / invitations 
                │                         │                        └─ artifacts（metadata; 実体は ArtifactStore）
                │                         ├─ visual_baselines / visual_comparisons / baseline_history / performance_baselines
                │                         ├─ failure_groups ─ defects ─ defect_links / defect_history
+               │                         ├─ bug_report_intakes ─ bug_reports ─ bug_report_attachments（→ artifacts、defect_links: bug_report）
                │                         ├─ manual_cases ─ manual_case_requirements / manual_check_results / exploratory_sessions
                │                         └─ schedules
                ├─ notifications / notification_deliveries / ai_suggestions / ai_invocations / usage_counters / backups
@@ -42,7 +43,10 @@ organizations ─┬─ users (org_members: role)      api_tokens / invitations 
 | `artifacts` | 証跡メタデータ | `kind` screenshot/video/trace/dom/console/network/diff/report/har…、`storage_key`、`sha256`、`restricted`、`retention_class`、`expires_at`、`ix_artifacts_expiry` |
 | `visual_baselines` / `visual_comparisons` / `baseline_history` | Visual regression | baseline は (project, scenario, step_key, browser, viewport_key) で一意。比較 status new_baseline_needed/match/diff/approved/rejected。履歴に actor / reason / from→to |
 | `failure_groups` | fingerprint ごとの集約 | (project_id, fingerprint) UNIQUE、`occurrence_count`、`defect_id` |
-| `defects` / `defect_links` / `defect_history` | 不具合 | status new→open→in_progress→ready_for_retest→verified/reopened→closed、links（result / scenario / requirement / failure_group / run） |
+| `defects` / `defect_links` / `defect_history` | 不具合 | status new→open→in_progress→ready_for_retest→verified/reopened→closed、links（result / scenario / requirement / failure_group / run / bug_report / release_candidate） |
+| `bug_reports` | ProofFlow 不具合報告（マスク済みのみ保存） | key BR-n、`source` web/api/intake、`idempotency_key` UNIQUE(project_id, idempotency_key)、`status` processing→defect_created / attached_to_defect、`content_json`（マスク後の報告）、`redaction_json`（種別ごとの件数・残した種別、原文なし）、`findings_json`（field / category のみ）、`similar_json`（類似 Defect 候補）、`report_ja` / `report_en`（Markdown）、`defect_id`、`reporter_kind` / `reporter_id` |
+| `bug_report_intakes` | 外部受付フォーム | `token_hash`（sha256）UNIQUE、`token_prefix`、既定 severity / priority、RC / 環境、`max_per_hour`、`revoked_at` |
+| `bug_report_attachments` | 報告の添付 | PK artifact_id（artifacts の kind screenshot / attachment）、`bug_report_id`（NULL = 未使用）、`intake_id` / `uploaded_by`（所有者確認）、`processing_json`（除去したメタデータ / マスク件数） |
 | `release_candidates` / `gate_evaluations` / `accepted_risks` / `evidence_reports` | RC と Gate | `gate_rules_json`、評価結果 READY / BLOCKED / READY_WITH_ACCEPTED_RISK、risk は approver_user_id 必須、report は artifact + checksum |
 | `manual_cases` / `manual_check_results` / `exploratory_sessions` | 手動テスト | device / os_version / browser / tester / artifact_ids |
 | `schedules` | cron | `timezone`、`overlap_policy` skip/queue、`next_run_at` |

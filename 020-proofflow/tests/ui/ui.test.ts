@@ -100,6 +100,7 @@ describe('Web UI on PC / iPhone / Android', () => {
       await check('visual', `${P}/visual`);
       await check('defects', `${P}/defects`, demo.defects[0]?.key);
       if (demo.defects[0]) await check('defect-detail', `${P}/defects/${demo.defects[0].id}`, demo.defects[0].key);
+      await check('bug-reports', `${P}/bug-reports`, 'ProofFlow 不具合報告');
       await check('releases', `${P}/releases`, '1.2.0');
       await check('release-detail', `${P}/releases/${demo.rcId}`, 'READY');
       await check('manual', `${P}/manual`, 'iPhone');

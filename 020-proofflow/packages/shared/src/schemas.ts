@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { PROJECT_TYPES, ENVIRONMENT_KINDS, DESTRUCTIVE_POLICIES, TEST_DATA_POLICIES, SEVERITIES, PRIORITIES, SUITE_KINDS, BROWSERS, DEFECT_STATUSES, MANUAL_CATEGORIES, MANUAL_RESULTS } from './enums.js';
 import { ROLES } from './rbac.js';
 import { StepsSchema } from './steps.js';
+import { BugReportContentSchema, RedactionDecisionSchema } from './bugreport/types.js';
 
 export const Slug = z.string().min(1).max(64).regex(/^[a-z0-9][a-z0-9-]*$/);
 export const Email = z.string().email().max(254);
@@ -95,3 +96,26 @@ export const ScheduleUpdate = ScheduleCreate.partial();
 export const DomainVerifyCreate = z.object({ hostname: z.string().min(1).max(253), method: z.enum(['dns_txt', 'html_token', 'well_known', 'manual']) });
 
 export const AiDraftRequest = z.object({ prompt: z.string().min(3).max(4000), requirementId: z.string().optional(), targetUrl: z.string().max(2000).optional(), count: z.number().int().min(1).max(12).default(6) });
+
+// ---------------- ProofFlow 不具合報告 (merged from ErrorRelay) ----------------
+export const RedactionDecisions = z.record(z.string().max(40), RedactionDecisionSchema);
+/** Body of POST /bug-reports (internal) and POST /intake/:id/bug-reports (external). Severity / priority / target defect are ignored for external intake. */
+export const BugReportSubmit = BugReportContentSchema.extend({
+  idempotencyKey: z.string().min(8).max(200).regex(/^[A-Za-z0-9._:-]+$/),
+  attachmentIds: z.array(z.string().max(40)).max(10).default([]),
+  decisions: RedactionDecisions.default({}),
+  releaseCandidateId: z.string().max(40).optional(),
+  environmentId: z.string().max(40).optional(),
+  severity: z.enum(SEVERITIES).optional(),
+  priority: z.enum(PRIORITIES).optional(),
+  existingDefectId: z.string().max(40).optional(),
+});
+export const BugReportPreview = BugReportContentSchema.extend({ decisions: RedactionDecisions.default({}) });
+export const BugIntakeCreate = z.object({
+  name: z.string().trim().min(1).max(100),
+  defaultSeverity: z.enum(SEVERITIES).default('medium'),
+  defaultPriority: z.enum(PRIORITIES).default('p2'),
+  releaseCandidateId: z.string().max(40).optional(),
+  environmentId: z.string().max(40).optional(),
+  maxPerHour: z.number().int().min(1).max(1000).default(30),
+});

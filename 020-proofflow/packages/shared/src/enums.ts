@@ -21,7 +21,7 @@ export const JOB_STATUSES = ['queued', 'leased', 'running', 'done', 'failed', 'c
 export const BROWSERS = ['chromium', 'firefox', 'webkit'] as const;
 export type BrowserName = (typeof BROWSERS)[number];
 
-export const ARTIFACT_KINDS = ['screenshot', 'video', 'trace', 'console', 'network', 'dom', 'diff', 'baseline', 'report', 'har', 'download', 'manual_evidence', 'exploratory', 'backup', 'other'] as const;
+export const ARTIFACT_KINDS = ['screenshot', 'video', 'trace', 'console', 'network', 'dom', 'diff', 'baseline', 'report', 'har', 'download', 'manual_evidence', 'exploratory', 'backup', 'attachment', 'other'] as const;
 export type ArtifactKind = (typeof ARTIFACT_KINDS)[number];
 export const RETENTION_CLASSES = ['passed', 'failed', 'release_evidence', 'baseline', 'manual'] as const;
 export type RetentionClass = (typeof RETENTION_CLASSES)[number];

@@ -83,3 +83,21 @@
 
 ## D-021 UI 検証は Chromium のデバイスエミュレーション、実機は人間の確認項目
 - `tests/ui` は PC 1440×900 / iPhone 15 相当 / Pixel 8 相当で全ページを撮影し、page error・console error・横 overflow を機械判定。実機 Safari / Chrome の確認は RELEASE_CHECKLIST.md に残す。
+
+## D-022 商品 #019 ErrorRelay を「ProofFlow 不具合報告」として統合（2026-10-08）
+- 目的: 利用者・テスターのエラー報告を、発生日時・環境・再現手順・証跡のそろった ProofFlow Defect にする。名称は統合先に合わせ「ProofFlow 不具合報告」「ProofFlow 個人情報マスク」。詳細は BUG_REPORT_INTAKE.md。
+- 統合したもの: 報告スキーマ（OpenAI 製品固有の項目を除いた部分集合、`packages/shared/src/bugreport/types.ts`）、privacy scanner + redaction + EXIF / PNG メタデータ除去（ErrorRelay core を移植、テストも移植）、発生日時（タイムゾーン付き、推測しない）、ブラウザ環境の自動取得（端末名は推測しない）、ルールベースの再現手順ビルダー、ja / en レポート生成（short / detailed / json）、品質チェックリスト（点数なし）、類似度による既知不具合ヒント、クライアント生成キーによる冪等送信。
+- 統合方法: ErrorRelay の独自ストア・tenant・signed URL・暗号化ストレージ・retention・rate limit は使わず、ProofFlow の Organization / RBAC（requireProject、service token の projectIds）、artifacts（ArtifactStore + 署名 URL + retention class）、Defect / defect_links、audit、@fastify/rate-limit に載せた。報告は必ず Defect になる（新規、または既存 Defect に証跡として追加）。
+- 方針:
+  - マスクは保存前にサーバーで必ず適用（Web 画面は同じライブラリでプレビューを表示するだけ）。高リスク種別（キー・トークン・パスワード・OTP・カード・トークン付き URL）は「残す」指定を無視。保存直前に原文の残存を再検査し、残っていれば保存しない。
+  - 外部受付は Project ごとの intake（token は sha256 のみ保存、1 回だけ表示、ヘッダー `x-proofflow-intake-token`、URL では fragment に置きサーバーログに残さない）。報告者は重要度・優先度・RC・環境・対象 Defect を選べない（intake の既定値）。応答は受付番号だけで、既存 Defect の情報（類似候補を含む）は返さない。1 時間あたり上限（DB 集計、両方言で同じ動作）+ ルート単位の rate limit。
+  - 冪等: UNIQUE(project_id, idempotency_key)。同じ報告者の再送は同じ報告を返し、別の報告者が同じ key を使うと 409。処理途中で失敗した場合は行を消して再送可能にする。
+  - 再現手順ビルダーは ErrorRelay の分割規則を一部変更（日本語の接続語の直後で分割し動詞を手順に残す。例「カートを開いて」→「カートを開く。」）。ErrorRelay の製品別コンテキスト手順は呼び出し側が渡す任意の文に置き換え。
+  - 類似度は日本語を文字 bigram に分割（ErrorRelay は空白区切りのみで日本語に弱い）、マスク placeholder は比較から除外。
+- 統合しなかったもの（理由）:
+  - Desktop Companion（apps/companion）: クリップボード・OS 情報・ローカル CLI 実行を伴う常駐アプリで、ProofFlow の自己ホスト Web 基盤の範囲外。必要なら後で別配布。
+  - 外部送信アダプタ（GitHub Issue / OpenAI Support / Codex feedback / メール / Web フォーム）と送信確認フロー: 第三者サービスへの送信と資格情報管理を伴うため。ProofFlow では Defect が受け皿（Jira / Linear 連携は既存の Pro 候補）。
+  - AI 解析（スクリーンショット解析・AI 再現手順・ErrorRelay の AI provider）: 有料 API 呼び出し。ProofFlow の AI 方針（D-006、提案のみ）に合わせて後で ai_suggestions として追加する候補。
+  - ZIP 診断パッケージの export / import、follow-up 返信、報告の状態遷移（handoff / submitted）、OpenAI status / GitHub 既知 issue 検索、Codex doctor / API エラー解析: OpenAI 製品向け、または Defect のライフサイクルと重複するため。
+  - ErrorRelay の signed URL・暗号化ストレージ・retention・tenant・token 認証・rate limit: ProofFlow の同等機能（署名付き artifact URL、retention class、Organization / RBAC、API token、@fastify/rate-limit）を使用。添付の保存時暗号化は ProofFlow の他の証跡と同じく未実施（ARTIFACT_SECURITY.md）。
+  - 画像の塗りつぶし（canvas redactor）: UI 作業として後回し。代わりに手動確認チェックリストを表示。WebP / GIF はブラウザで PNG に再エンコードしてから送る（サーバーは PNG / JPEG のみ受理）。

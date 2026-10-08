@@ -3,8 +3,8 @@ ChatGPT / Codex / Claude Code から使う（MCP Plugin）
 
 ProofFlow には MCP（Model Context Protocol）server が同梱されています。ChatGPT、Codex CLI、Claude Code などの AI エージェントが、ProofFlow の API を「道具」として使えます。エージェントができるのはテストの実行・結果の要約・不具合の登録・再テスト・Gate の評価までで、リリース承認・baseline 更新・Accepted Risk はできません。
 
-■ 道具（11 個）
-create_project / analyze_test_target / draft_acceptance_tests / create_test_scenario / run_test_suite / get_test_run / summarize_failures / create_defect_from_failure / retest_defect / get_release_gate / prepare_release_evidence
+■ 道具（12 個）
+create_project / analyze_test_target / draft_acceptance_tests / create_test_scenario / run_test_suite / get_test_run / summarize_failures / create_defect_from_failure / retest_defect / get_release_gate / prepare_release_evidence / submit_bug_report（不具合報告。個人情報は保存前にマスク）
 
 ■ 1. トークンを作る
 画面「設定・メンバー・トークン」→ API トークン → 種類「mcp」（または service）、role は developer か tester を推奨、対象 Project を限定（projectIds）。トークンは一度しか表示されません。許可していない Project はエージェントから見えません（404）。

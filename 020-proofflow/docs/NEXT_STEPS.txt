@@ -18,6 +18,14 @@ B. 出荷後の改善候補（初版の範囲外。PLAN.md「Pro 版候補」）
 - usage quota の強制（現在は計測のみ）
 - Project 単位の部分復元
 
+B2. ProofFlow 不具合報告（ErrorRelay 統合、DECISIONS D-022）の続き
+- 実機 iPhone Safari / Android Chrome で外部受付フォーム（/intake/…）から報告し、スクショ添付と環境の自動取得を確認する（本環境は Chromium エミュレーションのみ）。
+- UI 仕上げ: 画像の塗りつぶし（ErrorRelay apps/pwa/src/redactor.ts の canvas redactor を移植）、3 ステップのウィザード化、英語 UI。
+- 外部受付フォームを他サイトに埋め込む場合の CORS / iframe 方針を決める（現状は ProofFlow が配信するページ専用）。
+- AI による報告整理（スクショ解析・再現手順の提案）を ai_suggestions として追加する（有料 API、提案のみ）。
+- GitHub / Jira / メール への送信アダプタ（ErrorRelay adapters）は Jira / Linear 連携と合わせて検討。
+- Desktop Companion は別配布として要否を判断。
+
 C. 保守
 - Playwright の更新時は Visual baseline の再承認が必要になることを購入者に案内する。
 - DB migration を追加したら BackupService.TABLES と tests/phase11 を更新する（DEVELOPMENT.md）。

@@ -13,7 +13,7 @@ HTTP モードは **stateless**（リクエストごとに McpServer を生成�
 ## Token
 Organization → Tokens で `kind: mcp`（または service）の token を作成。`projectIds` で対象 Project を制限できる。Plugin 経由でも **許可 Project 以外は 404**（必須テスト 35）。role は作成者以下。baseline 更新や release 承認を Plugin から行わせたくない場合は tester / developer role の token を使う。
 
-## Tools（11）
+## Tools（12）
 | tool | 内容 | annotations |
 |---|---|---|
 | create_project | Project（+ 最初の Environment）作成 | write |
@@ -27,6 +27,7 @@ Organization → Tokens で `kind: mcp`（または service）の token を作�
 | retest_defect | retest run（pass で Verified、fail で Reopened） | write |
 | get_release_gate | gate 評価（READY / BLOCKED / READY_WITH_ACCEPTED_RISK）。**承認はしない** | readOnly |
 | prepare_release_evidence | Evidence Report 生成（artifact id） | write |
+| submit_bug_report | ProofFlow 不具合報告: エラー報告（件名 / 実際 / 期待 / 手順 / エラー文）を Defect として登録。保存前に ProofFlow 個人情報マスク、`idempotencyKey` で冪等。添付は不可（Web / REST を使用） | write（idempotent） |
 
 例: 「この staging URL、release 前に確認して」→ `analyze_test_target` で Project/Environment と許可 Suite を提示 → destructive の有無を確認 → `run_test_suite` → `summarize_failures` → `get_release_gate`。第三者 URL は tool 引数に存在しない（登録済み Environment のみ）。
 

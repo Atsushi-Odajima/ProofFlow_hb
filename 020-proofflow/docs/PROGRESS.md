@@ -1,6 +1,6 @@
 # PROGRESS.md — 進捗（正）
 
-更新: 2026-10-01（Phase 12 完了時点）
+更新: 2026-10-08（ErrorRelay 統合「ProofFlow 不具合報告」完了時点）
 
 | Phase | 状態 | 検証 |
 |---|---|---|
@@ -17,6 +17,7 @@
 | 10 Security / Domain verification / Privacy / Retention / Audit | 完了 | tests/phase10（必須 28, 29, 30, 37, 38） |
 | 11 Backup/Restore / 負荷計測 / PC・iPhone・Android 検証 | 完了 | tests/phase11（必須 34、E2E-10）、tests/load（docs/load-results-sqlite.json）、tests/ui（docs/ui-verification/ 57 画面）。SQLite と PostgreSQL 16 の両方で phase1〜11 通過 |
 | 12 docs / deploy / 販売前 check | 完了 | 開発資料 19 件、購入者資料 15 件、deploy/（Dockerfile ×2、docker-compose、GitHub Actions）、RELEASE_CHECKLIST.md。Docker build・実 AI API・ChatGPT connector・Firefox/WebKit・実機は人間確認待ち |
+| 13 統合: ErrorRelay（#019）→ ProofFlow 不具合報告 / 個人情報マスク | 完了 | tests/bugreport（40 件、SQLite / PostgreSQL 16 の両方で通過）、UI 検証に bug-reports 画面を追加。DECISIONS D-022、BUG_REPORT_INTAKE.md |
 
 E2E-1〜10: tests/e2e/e2e.test.ts（結果は TEST_REPORT.md）。
 
@@ -42,7 +43,7 @@ E2E-1〜10: tests/e2e/e2e.test.ts（結果は TEST_REPORT.md）。
 19. Accepted Risk — defect + reason + approver（人）+ review date + impact
 20. Evidence Report / Traceability — HTML（PDF は Playwright がある場合）、checksum、免責文
 21. Git / CI / CLI — proofflow run/status/gate/retest/impact/export/import/report、exit code、GitHub Actions 例
-22. ChatGPT / Codex MCP Plugin — 11 tools、stdio / Streamable HTTP、Project 制限、destructive 拒否
+22. ChatGPT / Codex MCP Plugin — 12 tools、stdio / Streamable HTTP、Project 制限、destructive 拒否
 23. AI Failure / Defect / Selector assist — 提案のみ、結果不変、適用は人（必須 31, 32）
 24. Domain verification / abuse prevention — dns_txt / html_token / well_known / manual、低負荷モード
 25. Artifact privacy / security — 署名 URL（15 分）、restricted、redaction、retention、SSRF policy
@@ -50,7 +51,8 @@ E2E-1〜10: tests/e2e/e2e.test.ts（結果は TEST_REPORT.md）。
 27. Backup / Restore — JSON（schemaVersion / appVersion / checksum）、空環境復元 CLI、復元後 traceability 一致
 28. Required E2E / security / load tests — 必須テスト 1〜38、E2E-1〜10、負荷計測
 29. PC / iPhone / Android workflows — Web UI を 3 viewport で検証（エミュレーション）、Mobile suite、手動実機記録
-30. 購入者資料 / 運用費 — docs/buyer 15 件、OPERATING_COSTS.md
+30. 購入者資料 / 運用費 — docs/buyer 16 件、OPERATING_COSTS.md
+31. ProofFlow 不具合報告（ErrorRelay 統合）— Web 画面の報告フォーム（発生日時・環境自動取得・再現手順ビルダー・添付）とログイン不要の外部受付フォーム、保存前の ProofFlow 個人情報マスク（ブラウザで同じマスク結果を確認）、ja / en レポート、Defect 作成（RC 紐付け・添付は証跡）、類似 Defect のヒント、冪等送信、MCP submit_bug_report
 
 ## 未検証 / 既知の制約（正直に）
 - Firefox / WebKit: ブラウザ本体を取得できず未実行（コードパスのみ）。
@@ -58,4 +60,5 @@ E2E-1〜10: tests/e2e/e2e.test.ts（結果は TEST_REPORT.md）。
 - OpenAI / Anthropic 実 API: 未呼び出し（型検査 + mock）。ChatGPT connector 接続: 未確認。
 - Docker image build: 未実行（レジストリ到達不可）。
 - S3 互換ストレージ: interface のみ。Email adapter: stub。OAuth 2.1（MCP）: 未同梱。
+- ProofFlow 不具合報告: 外部受付フォームの実機（iPhone / Android）確認は未実施。画像の塗りつぶし・外部サービス送信・AI 解析・Desktop Companion は未統合（D-022）。
 - 負荷: 単一ノード・SQLite / PostgreSQL で 10,000 Run まで計測。1 億 Result 規模は未計測。

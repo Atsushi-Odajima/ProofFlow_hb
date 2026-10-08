@@ -7,14 +7,14 @@
 
 ## リポジトリ構成（pnpm workspace）
 ```
-packages/shared      型・zod schema・RBAC・step 定義・URL policy・redaction（server / runner / cli / web が共有）
+packages/shared      型・zod schema・RBAC・step 定義・URL policy・redaction（server / runner / cli / web が共有）。bugreport/ は ProofFlow 不具合報告・個人情報マスク（ブラウザでも動くので node:* を import しない。web は @proofflow/shared/bugreport を bundle）
 packages/server      control plane: Fastify API、DB（SQLite / PostgreSQL）、services、runner protocol、Web UI 配信、scheduler、restore CLI、seed
 packages/runner      runner plane: Playwright で typed step を実行、evidence 収集、redaction、trace 再パック
 packages/cli         proofflow CLI（run/status/gate/retest/impact/export/import/report）と REST client（@proofflow/cli/api）
 packages/mcp         ChatGPT / Codex / Claude Code 向け MCP server（stdio / Streamable HTTP）
 packages/web         React + Vite PWA（control plane が dist を配信）
 packages/sample-saas 意図的バグ入りのデモ対象アプリ
-tests/               vitest（phase1〜11、e2e、load、ui）
+tests/               vitest（phase1〜11、bugreport、e2e、load、ui）
 docs/                設計・運用・購入者向け資料
 deploy/              Dockerfile / docker-compose / GitHub Actions 例
 ```

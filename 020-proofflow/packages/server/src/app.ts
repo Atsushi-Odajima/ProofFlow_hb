@@ -24,6 +24,7 @@ import { releaseRoutes } from './routes/release.js';
 import { manualRoutes } from './routes/manual.js';
 import { integrationRoutes } from './routes/integration.js';
 import { opsRoutes } from './routes/ops.js';
+import { bugReportRoutes } from './routes/bugreports.js';
 import { APP_VERSION } from '@proofflow/shared';
 
 export interface AppOptions { cfg: Config; db: Db; logger?: boolean; services?: Services; aiProvider?: import('./ai/provider.js').AiProvider; }
@@ -93,6 +94,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   await app.register(manualRoutes);
   await app.register(integrationRoutes);
   await app.register(opsRoutes);
+  await app.register(bugReportRoutes);
   // Web UI (built SPA) with history-API fallback; API/runner/artifact paths are never shadowed.
   const webDir = opts.cfg.webDir ?? join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'web', 'dist');
   if (existsSync(join(webDir, 'index.html'))) {

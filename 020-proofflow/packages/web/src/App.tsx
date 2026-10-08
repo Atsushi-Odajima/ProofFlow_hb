@@ -14,6 +14,7 @@ import { ReleasesPage } from './pages/Releases.js';
 import { ManualPage } from './pages/Manual.js';
 import { SchedulesPage } from './pages/Schedules.js';
 import { SettingsPage } from './pages/Settings.js';
+import { BugReportsPage, PublicIntakePage } from './pages/BugReport.js';
 
 export interface Session { me: Me; orgId: string; role: string; projects: Project[]; project: Project | null; reload: () => void; }
 
@@ -24,9 +25,11 @@ export function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tick, setTick] = useState(0);
   const [unread, setUnread] = useState(0);
-  useEffect(() => { get<Me>('/api/v1/auth/me').then(setMe).catch(() => setMe(null)); }, [tick]);
+  useEffect(() => { if (path.startsWith('/intake/')) return; get<Me>('/api/v1/auth/me').then(setMe).catch(() => setMe(null)); }, [tick]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!me) return; const org = me.organizations.find((o) => o.id === orgId) ?? me.organizations[0]; if (!org) return; if (org.id !== orgId) setOrgId(org.id); get<Project[]>(`/api/v1/orgs/${org.id}/projects`).then(setProjects).catch(() => setProjects([])); get<Array<unknown>>(`/api/v1/orgs/${org.id}/notifications?unread=true&limit=50`).then((n) => setUnread(n.length)).catch(() => undefined); }, [me, orgId, tick]);
   useEffect(() => { if (orgId) localStorage.setItem('pf.org', orgId); }, [orgId]);
+  const intake = match('/intake/:intakeId', path);
+  if (intake) return <PublicIntakePage intakeId={intake.intakeId!} />; // public, token-protected; no login
   if (me === undefined) return <main><p className="muted">読み込み中…</p></main>;
   if (!me) return <LoginPage onLogin={() => setTick((t) => t + 1)} />;
   const org = me.organizations.find((o) => o.id === orgId) ?? me.organizations[0];
@@ -35,7 +38,7 @@ export function App() {
   if (project) localStorage.setItem('pf.project', project.id);
   const session: Session = { me, orgId: org?.id ?? '', role: org?.role ?? 'viewer', projects, project, reload: () => setTick((t) => t + 1) };
   const pid = project?.id;
-  const nav: Array<[string, string, string]> = pid ? [['/projects/' + pid + '/dashboard', 'ダッシュボード', '📊'], ['/projects/' + pid + '/runs', 'テスト実行', '▶'], ['/projects/' + pid + '/scenarios', 'シナリオ', '📝'], ['/projects/' + pid + '/suites', 'スイート', '🧩'], ['/projects/' + pid + '/requirements', '要件', '📋'], ['/projects/' + pid + '/visual', 'Visual', '🖼'], ['/projects/' + pid + '/defects', '不具合', '🐞'], ['/projects/' + pid + '/releases', 'リリース', '🚀'], ['/projects/' + pid + '/manual', '手動/実機', '📱'], ['/projects/' + pid + '/schedules', 'スケジュール', '⏰'], ['/projects/' + pid + '/settings', 'プロジェクト設定', '⚙']] : [];
+  const nav: Array<[string, string, string]> = pid ? [['/projects/' + pid + '/dashboard', 'ダッシュボード', '📊'], ['/projects/' + pid + '/runs', 'テスト実行', '▶'], ['/projects/' + pid + '/scenarios', 'シナリオ', '📝'], ['/projects/' + pid + '/suites', 'スイート', '🧩'], ['/projects/' + pid + '/requirements', '要件', '📋'], ['/projects/' + pid + '/visual', 'Visual', '🖼'], ['/projects/' + pid + '/defects', '不具合', '🐞'], ['/projects/' + pid + '/bug-reports', '不具合報告', '📨'], ['/projects/' + pid + '/releases', 'リリース', '🚀'], ['/projects/' + pid + '/manual', '手動/実機', '📱'], ['/projects/' + pid + '/schedules', 'スケジュール', '⏰'], ['/projects/' + pid + '/settings', 'プロジェクト設定', '⚙']] : [];
   const bottom: Array<[string, string, string]> = pid ? [['/projects/' + pid + '/dashboard', 'ホーム', '📊'], ['/projects/' + pid + '/runs', '実行', '▶'], ['/projects/' + pid + '/defects', '不具合', '🐞'], ['/projects/' + pid + '/releases', 'リリース', '🚀'], ['/settings', '設定', '⚙']] : [['/projects', 'プロジェクト', '📁'], ['/settings', '設定', '⚙']];
   const isActive = (to: string) => path.split('?')[0] === to || (to !== '/' && path.startsWith(to + '/'));
   const page = route(path, session, navigate);
@@ -74,6 +77,7 @@ function route(path: string, s: Session, navigate: (to: string) => void) {
   if ((m = match('/projects/:id/visual', p))) return <VisualPage s={s} projectId={m.id!} />;
   if ((m = match('/projects/:id/defects', p))) return <DefectsPage s={s} projectId={m.id!} />;
   if ((m = match('/projects/:id/defects/:defectId', p))) return <DefectsPage s={s} projectId={m.id!} defectId={m.defectId!} />;
+  if ((m = match('/projects/:id/bug-reports', p))) return <BugReportsPage s={s} projectId={m.id!} />;
   if ((m = match('/projects/:id/releases', p))) return <ReleasesPage s={s} projectId={m.id!} />;
   if ((m = match('/projects/:id/releases/:rcId', p))) return <ReleasesPage s={s} projectId={m.id!} rcId={m.rcId!} />;
   if ((m = match('/projects/:id/manual', p))) return <ManualPage s={s} projectId={m.id!} />;

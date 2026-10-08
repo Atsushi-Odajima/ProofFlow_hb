@@ -23,11 +23,12 @@ import { ScheduleService } from './schedule.js';
 import { NotificationService } from './notify.js';
 import { DomainService } from './domains.js';
 import { BackupService } from './backup.js';
+import { BugReportService } from './bugreports.js';
 import { asJson } from '../db/db.js';
 import { ulid } from '@proofflow/shared';
 import type { AiProvider } from '../ai/provider.js';
 
-export interface Services { db: Db; cfg: Config; audit: AuditService; auth: AuthService; orgs: OrgService; projects: ProjectService; requirements: RequirementService; scenarios: ScenarioService; ai: AiService; artifacts: ArtifactService; artifactStore: ArtifactStore; fixtureStore: ArtifactStore; runs: RunService; fixtures: FixtureService; openapi: OpenApiService; visual: VisualService; defects: DefectService; aiAssist: AiAssistService; release: ReleaseService; manual: ManualService; integration: IntegrationService; schedules: ScheduleService; notify: NotificationService; domains: DomainService; backup: BackupService; }
+export interface Services { db: Db; cfg: Config; audit: AuditService; auth: AuthService; orgs: OrgService; projects: ProjectService; requirements: RequirementService; scenarios: ScenarioService; ai: AiService; artifacts: ArtifactService; artifactStore: ArtifactStore; fixtureStore: ArtifactStore; runs: RunService; fixtures: FixtureService; openapi: OpenApiService; visual: VisualService; defects: DefectService; aiAssist: AiAssistService; release: ReleaseService; manual: ManualService; integration: IntegrationService; schedules: ScheduleService; notify: NotificationService; domains: DomainService; backup: BackupService; bugReports: BugReportService; }
 
 export async function createServices(db: Db, cfg: Config, opts: { aiProvider?: AiProvider; artifactStore?: ArtifactStore } = {}): Promise<Services> {
   const audit = new AuditService(db);
@@ -54,6 +55,7 @@ export async function createServices(db: Db, cfg: Config, opts: { aiProvider?: A
   const notify = new NotificationService(db, cfg, audit);
   const domains = new DomainService(db, cfg, audit);
   const backup = new BackupService(db, audit);
+  const bugReports = new BugReportService(db, audit, artifacts, defects, (d, pid, prefix) => projects.nextKey(d, pid, prefix));
   const notifyFn = (orgId: string, projectId: string, kind: string, title: string, body: string, link: string, dedupeKey: string) => notify.notify(orgId, projectId, kind, title, body, link, dedupeKey).then(() => undefined);
   defects.notify = notifyFn; release.notify = notifyFn;
   // Result hook: persist visual comparisons and crawl inventory from runner checks; group failures / reopen defects.
@@ -73,5 +75,5 @@ export async function createServices(db: Db, cfg: Config, opts: { aiProvider?: A
     const pending = await visual.pendingCount(run.project_id, [run.id]);
     if (pending > 0) await notifyFn(run.org_id, run.project_id, 'visual.review_needed', `${pending} visual change(s) await review`, `Run ${run.id} produced visual differences`, `/projects/${run.project_id}/visual`, `visual.review:${run.id}`);
   };
-  return { db, cfg, audit, auth, orgs, projects, requirements, scenarios, ai, artifacts, artifactStore, fixtureStore, runs, fixtures, openapi, visual, defects, aiAssist, release, manual, integration, schedules, notify, domains, backup };
+  return { db, cfg, audit, auth, orgs, projects, requirements, scenarios, ai, artifacts, artifactStore, fixtureStore, runs, fixtures, openapi, visual, defects, aiAssist, release, manual, integration, schedules, notify, domains, backup, bugReports };
 }

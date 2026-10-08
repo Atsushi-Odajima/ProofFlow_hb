@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ProofFlowApi, ApiError } from '@proofflow/cli/api';
 import { StepsSchema } from '@proofflow/shared';
 
-export const TOOL_NAMES = ['create_project', 'analyze_test_target', 'draft_acceptance_tests', 'create_test_scenario', 'run_test_suite', 'get_test_run', 'summarize_failures', 'create_defect_from_failure', 'retest_defect', 'get_release_gate', 'prepare_release_evidence'] as const;
+export const TOOL_NAMES = ['create_project', 'analyze_test_target', 'draft_acceptance_tests', 'create_test_scenario', 'run_test_suite', 'get_test_run', 'summarize_failures', 'create_defect_from_failure', 'retest_defect', 'get_release_gate', 'prepare_release_evidence', 'submit_bug_report'] as const;
 
 type ToolResult = { content: Array<{ type: 'text'; text: string }>; structuredContent?: Record<string, unknown>; isError?: boolean };
 const okResult = (data: Record<string, unknown>, text?: string): ToolResult => ({ content: [{ type: 'text', text: text ?? JSON.stringify(data, null, 2) }], structuredContent: data });
@@ -85,6 +85,16 @@ export function buildMcpServer(api: ProofFlowApi): McpServer {
       const ai: unknown[] = [];
       if (args.useAi) for (const r of failed.slice(0, 5)) { try { ai.push({ resultId: r.id, summary: (await api.post<{ output: unknown }>(`/api/v1/results/${r.id}/ai/failure-summary`)).output }); } catch (e) { ai.push({ resultId: r.id, error: e instanceof Error ? e.message : String(e) }); } }
       return okResult({ runId: run.id, status: run.status, counts: run.counts, groups: [...groups.values()], aiSummaries: ai, note: 'Root causes are hypotheses with explicit confidence; the test results themselves are unchanged.' });
+    } catch (e) { return errResult(e); }
+  });
+
+  server.registerTool('submit_bug_report', { title: 'Submit bug report (ProofFlow 不具合報告)', description: 'File an error report (what happened / expected / actual / steps / environment) as a ProofFlow Defect. ProofFlow masks e-mails, phone numbers, keys, tokens, passwords and card numbers before storing. Idempotent per idempotencyKey. Attachments are not supported through this tool (use the web form or the REST API).', inputSchema: { project: z.string(), idempotencyKey: z.string().min(8).max(200).regex(/^[A-Za-z0-9._:-]+$/), title: z.string().min(1).max(300), description: z.string().max(10000).optional(), expected: z.string().max(5000).optional(), actual: z.string().max(5000).optional(), steps: z.array(z.string().max(1000)).max(50).optional(), errorText: z.string().max(20000).optional(), language: z.enum(['ja', 'en']).default('ja'), severity: z.enum(['critical', 'high', 'medium', 'low']).optional(), releaseVersion: z.string().optional() }, annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false } }, async (args) => {
+    try {
+      const project = await api.resolveProject(args.project);
+      let releaseCandidateId: string | undefined;
+      if (args.releaseVersion) { const rcs = await api.get<Array<{ id: string; version: string }>>(`/api/v1/projects/${project.id}/releases`); releaseCandidateId = rcs.find((r) => r.version === args.releaseVersion)?.id; if (!releaseCandidateId) throw new Error(`release ${args.releaseVersion} not found`); }
+      const r = await api.post<{ id: string; key: string; defectId: string; replayed: boolean; redaction: unknown; similar: unknown[] }>(`/api/v1/projects/${project.id}/bug-reports`, { idempotencyKey: args.idempotencyKey, title: args.title, description: args.description, expected: args.expected, actual: args.actual, steps: args.steps, errorText: args.errorText, language: args.language, severity: args.severity, releaseCandidateId });
+      return okResult({ reportId: r.id, reportKey: r.key, defectId: r.defectId, replayed: r.replayed, redaction: r.redaction, similarOpenDefects: r.similar });
     } catch (e) { return errResult(e); }
   });
 

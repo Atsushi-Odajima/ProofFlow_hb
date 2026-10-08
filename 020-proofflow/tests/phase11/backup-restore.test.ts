@@ -6,6 +6,7 @@ import { createPipeline, type Pipeline } from '../helpers/pipeline.js';
 import { createTestApp, api, login, type TestApp } from '../helpers/app.js';
 import { restoreMain } from '@proofflow/server/restore';
 import type { BackupDocument } from '@proofflow/server/services/backup';
+import { SCHEMA_VERSION } from '@proofflow/shared';
 
 let p: Pipeline; let restored: TestApp | null = null;
 beforeAll(async () => { p = await createPipeline(); }, 120_000);
@@ -49,7 +50,7 @@ describe('Phase 11: backup / restore (必須テスト34, E2E-10)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.headers['content-disposition']).toContain('proofflow-backup-');
     doc = res.json() as BackupDocument;
-    expect(doc.format).toBe('proofflow-backup'); expect(doc.schemaVersion).toBe(1); expect(doc.appVersion).toBe('0.1.0'); expect(doc.checksum).toMatch(/^[0-9a-f]{64}$/);
+    expect(doc.format).toBe('proofflow-backup'); expect(doc.schemaVersion).toBe(SCHEMA_VERSION); expect(doc.appVersion).toBe('0.1.0'); expect(doc.checksum).toMatch(/^[0-9a-f]{64}$/);
     expect(doc.counts.test_runs).toBe(1); expect(doc.counts.requirements).toBe(1); expect(doc.counts.defects).toBe(1); expect(doc.counts.release_candidates).toBe(1); expect(doc.counts.gate_evaluations).toBe(1); expect(doc.counts.manual_check_results).toBe(1);
     expect(doc.counts.artifacts).toBeGreaterThan(0); expect(doc.counts.secrets).toBe(2); expect(doc.counts.users).toBe(2);
     expect(doc.tables.sessions).toBeUndefined();

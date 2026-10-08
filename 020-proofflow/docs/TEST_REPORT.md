@@ -14,6 +14,20 @@ Firefox / WebKit のブラウザ本体は本環境で取得できず（CDN 遮�
 | 負荷計測（SQLite ファイル） | `pnpm test:load` | 通過（§4、docs/load-results-sqlite.json） |
 | 負荷計測（PostgreSQL 16） | `PROOFFLOW_TEST_DATABASE_URL=... pnpm test:load` | 通過（§4、docs/load-results-postgres.json） |
 
+## 1-2. ErrorRelay 統合（ProofFlow 不具合報告）後の再実行（2026-10-08）
+環境: 同一ホスト種別（Node v22.22.0、pnpm 10.28.0、Chromium 141 headless shell、PostgreSQL 16 ローカル）。
+
+| 区分 | 統合前（ベースライン） | 統合後 |
+|---|---|---|
+| build / typecheck（7 パッケージ + ルート tsc） | 通過 | 通過 |
+| `pnpm test`（SQLite） | 66 / 67 通過（phase4 必須テスト16 が 1 回失敗。単独再実行では通過＝タイミング依存の flaky と判断、統合コードとは無関係） | **107 / 107 通過**（15 ファイル: 既存 67 + tests/bugreport 40） |
+| `pnpm test:pg`（PostgreSQL 16） | 66 / 67 通過（同じ phase4 の 1 件） | **107 / 107 通過** |
+| `pnpm test:e2e` | — | 10 / 10 通過 |
+| `pnpm test:ui` | — | 4 / 4 通過: 20 画面 × 3 viewport = 60 画面（bug-reports 画面を追加）、page error 0、横 overflow 0 |
+
+tests/bugreport の内訳: privacy 11（ErrorRelay privacy.test の移植 8 + 報告全体のマスク 3。ZIP / Codex doctor / API body は未統合のため除外）、report 15（report / timestamp テストの移植 + 日本語分割・類似度）、intake 13（報告 → Defect、保存前マスクを DB 生データで確認、PNG メタデータ除去・テキスト添付マスク、RC 紐付け・証跡の retention、冪等再送と他人の key 再利用 409、viewer 403 / developer 可 / intake 管理は QA Lead 以上、他 tenant 404、projectIds 制限 token、添付の Project / 所有者確認、外部受付の token 401 / 不明 404 / 既定重要度の強制 / 受付番号のみ返却 / 1 時間上限 429 / 無効化 404、backup → 空環境 restore 一致）、mcp 1（submit_bug_report、冪等、許可外 Project 404）。
+手動確認（Playwright スクリプト、PC 1440×900 / 390×844）: 画面からの報告（手順ビルダー・「今起きた」・スクショ添付・既存不具合との照合・マスク後プレビュー）→ Defect 作成、外部受付フォーム（/intake/…#token=…）から報告 → 受付番号表示、一覧と詳細ドロワー。console error 0。実機 iPhone / Android は未確認。
+
 ## 2. 必須テスト 1〜38 の対応（すべて自動テストで通過）
 | # | 内容 | テスト |
 |---|---|---|
@@ -56,7 +70,7 @@ Firefox / WebKit のブラウザ本体は本環境で取得できず（CDN 遮�
 | 37 | artifact retention delete（storage + metadata + 署名 URL 失効） | phase10 |
 | 38 | audit log（RBAC / secret / env / scenario / baseline / gate / risk / defect close / export / runner / backup） | phase1, phase10, phase11 |
 
-テスト数: phase1 9 / phase2 11 / phase3 7 / phase4 7 / phase5 5 / phase6 7 / phase7 4 / phase8 5 / phase9 3 / phase10 7 / phase11 2 = 67、E2E 10、UI 4、load 1。
+テスト数（統合後は tests/bugreport 40 を加えて 107）: phase1 9 / phase2 11 / phase3 7 / phase4 7 / phase5 5 / phase6 7 / phase7 4 / phase8 5 / phase9 3 / phase10 7 / phase11 2 = 67、E2E 10、UI 4、load 1。
 
 ## 3. E2E-1〜10
 | E2E | 内容 | 備考 |

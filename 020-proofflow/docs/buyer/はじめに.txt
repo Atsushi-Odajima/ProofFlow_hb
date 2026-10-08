@@ -14,6 +14,7 @@ AI が「たぶん大丈夫」と言う製品ではありません。テスト�
 - 失敗の fingerprint 化と不具合（Defect）管理、修正後の再テストで Verified / 再発で Reopened、Flaky 検出
 - Release Candidate と Release Gate（READY / BLOCKED / READY WITH ACCEPTED RISK）、Evidence Report（HTML / PDF）
 - 手動 / 実機確認の記録（iPhone / Android の実機は人が確認し証跡を添付）
+- ProofFlow 不具合報告: 利用者・テスターのエラー報告（発生日時・環境・再現手順・スクショ）を、ProofFlow 個人情報マスクをかけてから不具合票にする（ログイン不要の外部受付フォームあり）
 - CLI（proofflow run / status / gate）、GitHub Actions 例、ChatGPT / Codex / Claude Code 向け MCP Plugin
 - スケジュール実行、通知（アプリ内 / Webhook / Slack）、バックアップ / 復元、監査ログ
 
@@ -33,7 +34,7 @@ AI が「たぶん大丈夫」と言う製品ではありません。テスト�
 
 ■ 最初に読む順番
 1. 5分で最初のテスト.txt
-2. 不具合の見方.txt → 修正後に再テストする.txt
+2. 不具合の見方.txt → 修正後に再テストする.txt（外部からの報告は 不具合報告を受け付ける.txt）
 3. Release Gate.txt
 4. 必要に応じて スマホ表示を確認する.txt / Visual Regression.txt / ChatGPT-Codex Plugin.txt / CI連携.txt / 実機確認.txt
 5. 個人情報とテストデータ.txt / 運用コスト.txt / 注意事項.txt は運用前に必ず

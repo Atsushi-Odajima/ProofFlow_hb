@@ -16,6 +16,11 @@
 | Runner の乗っ取り | runner token は `pfr_` 種別、lease した job しか操作不可（他 runner の job は 403）。runner はコンテナで実行し、Playwright ブラウザは headless + sandbox（deploy/Dockerfile.runner） |
 | DNS rebinding（MCP HTTP） | Origin allowlist、127.0.0.1 bind 既定、Bearer 必須 |
 
+## ProofFlow 不具合報告（外部受付）
+- 外部受付は Project ごとの intake token（sha256 保存、1 回だけ表示、無効化可能）でのみ受け付ける。報告者は Defect の重要度・対象を選べず、既存 Defect の情報を受け取らない。1 時間あたり上限 + ルート rate limit。
+- 報告本文・環境値・ファイル名・テキスト添付は保存前に ProofFlow 個人情報マスク。画像は PNG / JPEG のみ受理し、中身と content-type の一致を確認、メタデータを除去。画像の中身は自動検出しない（手動確認）。
+- 添付は所有者（アップロードした user / token / intake）と Project が一致しないと報告に使えない。
+
 ## 既知の制約 / 今後
 - Runner 側の DNS 解決後 IP 検査（rebinding 完全対策）は未実装。private 到達は Environment + runner の二重 opt-in で制御。
 - MFA bypass は実装しない。test 用アカウントや storage state を使う。
